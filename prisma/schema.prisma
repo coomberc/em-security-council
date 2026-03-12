@@ -1,0 +1,309 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  APPROVER
+  COUNCIL_MEMBER
+  STAFF_MEMBER
+}
+
+enum SignOffStatus {
+  DRAFT
+  SUBMITTED
+  HAS_COMMENTS
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum SignOffCategory {
+  NEW_SUPPLIER_SOFTWARE
+  THIRD_PARTY_TOOL
+  SCOPE_CHANGE
+  NEW_PRODUCT_PLATFORM
+  SIGNIFICANT_CHANGE
+  TECHNICAL_INTEGRATION
+  AI_FUNCTIONALITY
+  DATA_SECURITY_IMPACT
+  OTHER
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+  HAS_COMMENTS
+}
+
+enum RiskLikelihood {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum RiskImpact {
+  NEGLIGIBLE
+  MINOR
+  MODERATE
+  MAJOR
+  SEVERE
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model Department {
+  id         String    @id
+  name       String
+  slug       String    @unique
+  archivedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  signOffs SignOff[]
+  users    User[]
+
+  @@map("departments")
+}
+
+model User {
+  id              String   @id
+  email           String   @unique
+  name            String
+  avatarUrl       String?
+  role            UserRole @default(STAFF_MEMBER)
+  isFixedApprover Boolean  @default(false)
+  slackId         String?
+  departmentId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  department       Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  submittedSignOffs SignOff[]           @relation("SubmittedBy")
+  approverAssignments SignOffApprover[]
+  approvals        SignOffApproval[]
+  comments         SignOffComment[]
+  statusChanges    SignOffStatusChange[]
+  supportingDocs   SignOffSupportingDoc[]
+  adminAuditLogs   AdminAuditLog[]
+
+  @@map("users")
+}
+
+model SignOff {
+  id                    String           @id @default(cuid())
+  sequenceNumber        Int              @unique @default(autoincrement())
+  status                SignOffStatus    @default(DRAFT)
+  title                 String
+  categories            SignOffCategory[]
+  vendorName            String?
+  vendorWebsite         String?
+  description           String           @default("")
+  dueDiligence          String           @default("")
+  rollOutPlan           String           @default("")
+  cost                  String           @default("")
+  isTrial               Boolean          @default(false)
+  trialDuration         String?
+  trialDataAccessScope  String?
+  trialSuccessCriteria  String?
+  trialGoLiveRolloutPlan String?
+  trialEndDate          DateTime?
+  parentSignOffId       String?
+  contentVersion        Int              @default(1)
+  submittedById         String
+  departmentId          String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submittedBy    User                  @relation("SubmittedBy", fields: [submittedById], references: [id])
+  department     Department            @relation(fields: [departmentId], references: [id])
+  parentSignOff  SignOff?              @relation("TrialToRollout", fields: [parentSignOffId], references: [id], onDelete: SetNull)
+  childSignOffs  SignOff[]             @relation("TrialToRollout")
+  customSections SignOffCustomSection[]
+  supportingDocs SignOffSupportingDoc[]
+  approvers      SignOffApprover[]
+  approvals      SignOffApproval[]
+  comments       SignOffComment[]
+  statusHistory  SignOffStatusChange[]
+  riskAssessment RiskAssessment?
+
+  @@index([status])
+  @@index([submittedById])
+  @@index([departmentId])
+  @@index([createdAt(sort: Desc)])
+  @@map("sign_offs")
+}
+
+model SignOffCustomSection {
+  id        String @id @default(cuid())
+  signOffId String
+  title     String
+  content   String @default("")
+  sortOrder Int    @default(0)
+
+  signOff SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+
+  @@index([signOffId])
+  @@map("sign_off_custom_sections")
+}
+
+model SignOffSupportingDoc {
+  id        String   @id @default(cuid())
+  signOffId String
+  title     String
+  url       String
+  addedById String
+  createdAt DateTime @default(now())
+
+  signOff SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+  addedBy User    @relation(fields: [addedById], references: [id])
+
+  @@index([signOffId])
+  @@map("sign_off_supporting_docs")
+}
+
+model SignOffApprover {
+  signOffId String
+  userId    String
+  isFixed   Boolean @default(false)
+
+  signOff SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([signOffId, userId])
+  @@map("sign_off_approvers")
+}
+
+model SignOffApproval {
+  id             String           @id @default(cuid())
+  signOffId      String
+  approverId     String
+  decision       ApprovalDecision
+  comment        String?
+  contentVersion Int
+  createdAt      DateTime         @default(now())
+  revokedAt      DateTime?
+
+  signOff  SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+  approver User   @relation(fields: [approverId], references: [id])
+
+  @@index([signOffId])
+  @@map("sign_off_approvals")
+}
+
+model SignOffComment {
+  id        String   @id @default(cuid())
+  signOffId String
+  authorId  String
+  content   String
+  parentId  String?
+  createdAt DateTime @default(now())
+
+  signOff SignOff        @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+  author  User           @relation(fields: [authorId], references: [id])
+  parent  SignOffComment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: SetNull)
+  replies SignOffComment[] @relation("CommentThread")
+
+  @@index([signOffId])
+  @@map("sign_off_comments")
+}
+
+model SignOffStatusChange {
+  id          String         @id @default(cuid())
+  signOffId   String
+  fromStatus  SignOffStatus?
+  toStatus    SignOffStatus
+  changedById String
+  reason      String?
+  createdAt   DateTime       @default(now())
+
+  signOff   SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+  changedBy User    @relation(fields: [changedById], references: [id])
+
+  @@index([signOffId])
+  @@map("sign_off_status_changes")
+}
+
+model RiskAssessment {
+  id                     String            @id @default(cuid())
+  signOffId              String            @unique
+  dataClassification     DataClassification?
+  dataClassificationUnknown Boolean        @default(false)
+  personalDataInvolved   Boolean?
+  personalDataInvolvedUnknown Boolean      @default(false)
+  personalDataDetails    String?
+  dataStorageLocation    String?
+  dataStorageLocationUnknown Boolean       @default(false)
+  thirdPartyDataSharing  Boolean?
+  thirdPartyDataSharingUnknown Boolean     @default(false)
+  thirdPartyDataDetails  String?
+  likelihoodOfBreach     RiskLikelihood?
+  likelihoodOfBreachUnknown Boolean        @default(false)
+  impactOfBreach         RiskImpact?
+  impactOfBreachUnknown  Boolean           @default(false)
+  overallRiskScore       Int?
+  hasEncryptionAtRest    Boolean?
+  hasEncryptionAtRestUnknown Boolean       @default(false)
+  hasEncryptionInTransit Boolean?
+  hasEncryptionInTransitUnknown Boolean    @default(false)
+  hasMfa                 Boolean?
+  hasMfaUnknown          Boolean           @default(false)
+  hasAuditLogging        Boolean?
+  hasAuditLoggingUnknown Boolean           @default(false)
+  hasPenTestReport       Boolean?
+  hasPenTestReportUnknown Boolean          @default(false)
+  hasDisasterRecovery    Boolean?
+  hasDisasterRecoveryUnknown Boolean       @default(false)
+  hasSso                 Boolean?
+  hasSsoUnknown          Boolean           @default(false)
+  hasSla                 Boolean?
+  hasSlaUnknown          Boolean           @default(false)
+  slaDetails             String?
+  complianceCertifications String[]
+  mitigationPlan         String?
+  residualRiskNotes      String?
+
+  signOff SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
+
+  @@map("risk_assessments")
+}
+
+model AdminAuditLog {
+  id            String   @id @default(cuid())
+  action        String
+  targetType    String
+  targetId      String
+  performedById String
+  previousValue Json?
+  newValue      Json?
+  createdAt     DateTime @default(now())
+
+  performedBy User @relation(fields: [performedById], references: [id])
+
+  @@index([targetType, targetId])
+  @@index([performedById])
+  @@index([createdAt(sort: Desc)])
+  @@map("admin_audit_logs")
+}
