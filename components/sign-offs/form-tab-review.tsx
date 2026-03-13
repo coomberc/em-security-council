@@ -110,18 +110,6 @@ function validate(
     }
   }
 
-  // Risk assessment recommended warning
-  if (riskRequirement === 'recommended') {
-    const hasAnyRisk = risk.dataClassification || risk.likelihoodOfBreach || risk.impactOfBreach
-    if (!hasAnyRisk) {
-      issues.push({
-        type: 'warning',
-        message: 'Risk assessment is recommended for the selected categories',
-        tab: 'Risk Assessment',
-      })
-    }
-  }
-
   return issues
 }
 
@@ -166,7 +154,7 @@ export function FormTabReview({
       )}
 
       {warnings.length > 0 && (
-        <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] p-4 dark:border-[#b45309] dark:bg-[#78350f]">
+        <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] p-4 dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10">
           <div className="flex items-center gap-2 text-[#92400e] dark:text-[#fcd34d]">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             <span className="text-sm font-medium">
@@ -224,7 +212,7 @@ export function FormTabReview({
         {basics.isTrial && (
           <Badge
             variant="outline"
-            className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]"
+            className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10 dark:text-[#fcd34d]"
           >
             Trial / Pilot
           </Badge>
@@ -237,7 +225,7 @@ export function FormTabReview({
 
         {basics.isTrial && (
           <>
-            <div className="rounded-md border border-[#FFB900] bg-[#fef3c7]/50 p-3 space-y-2 dark:border-[#b45309] dark:bg-[#78350f]/30">
+            <div className="rounded-md border border-[#FFB900] bg-[#fef3c7]/50 p-3 space-y-2 dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10/30">
               <span className="text-xs font-semibold text-[#92400e] dark:text-[#fcd34d]">
                 Trial Details
               </span>

@@ -7,8 +7,8 @@ const STATUS_CONFIG: Record<SignOffStatus, { label: string; light: { bg: string;
     dark: { bg: 'rgba(107,114,128,0.15)', text: '#d1d5db', border: 'rgba(107,114,128,0.4)' },
   },
   SUBMITTED: {
-    label: 'Submitted',
-    light: { bg: '#fde68a', text: '#78350f', border: '#f59e0b' },
+    label: 'Awaiting Review',
+    light: { bg: '#fde68a', text: '#92400e', border: '#f59e0b' },
     dark: { bg: 'rgba(251,191,36,0.1)', text: '#fbbf24', border: 'rgba(251,191,36,0.4)' },
   },
   HAS_COMMENTS: {

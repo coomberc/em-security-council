@@ -2,40 +2,45 @@ import type { SignOffCategory } from '@/types'
 
 /** Categories that require a risk assessment at submit time */
 export const RISK_ASSESSMENT_REQUIRED_CATEGORIES: SignOffCategory[] = [
-  'NEW_SUPPLIER_SOFTWARE',
-  'THIRD_PARTY_TOOL',
-  'DATA_SECURITY_IMPACT',
-  'AI_FUNCTIONALITY',
-]
-
-/** Categories where risk assessment is recommended (prompted but optional) */
-export const RISK_ASSESSMENT_RECOMMENDED_CATEGORIES: SignOffCategory[] = [
-  'SCOPE_CHANGE',
-  'TECHNICAL_INTEGRATION',
+  'NEW_VENDOR_SUPPLIER',
+  'AI_ML_USAGE',
+  'DATA_HANDLING_CHANGE',
 ]
 
 /** Categories where risk assessment is optional (available but not prompted) */
 export const RISK_ASSESSMENT_OPTIONAL_CATEGORIES: SignOffCategory[] = [
-  'NEW_PRODUCT_PLATFORM',
-  'SIGNIFICANT_CHANGE',
+  'EXISTING_VENDOR_CHANGE',
+  'INFRASTRUCTURE_CHANGE',
+  'NEW_PRODUCT_FEATURE',
+  'INCIDENT_REMEDIATION',
   'OTHER',
 ]
 
 export const CATEGORY_LABELS: Record<SignOffCategory, string> = {
-  NEW_SUPPLIER_SOFTWARE: 'New Supplier Software',
-  THIRD_PARTY_TOOL: 'Third-Party Tool',
-  SCOPE_CHANGE: 'Scope Change',
-  NEW_PRODUCT_PLATFORM: 'New Product Platform',
-  SIGNIFICANT_CHANGE: 'Significant Change',
-  TECHNICAL_INTEGRATION: 'Technical Integration',
-  AI_FUNCTIONALITY: 'AI Functionality',
-  DATA_SECURITY_IMPACT: 'Data Security Impact',
+  NEW_VENDOR_SUPPLIER: 'New Vendor/Supplier',
+  EXISTING_VENDOR_CHANGE: 'Existing Vendor Change',
+  AI_ML_USAGE: 'AI/ML Usage',
+  DATA_HANDLING_CHANGE: 'Data Handling Change',
+  INFRASTRUCTURE_CHANGE: 'Infrastructure/Architecture Change',
+  NEW_PRODUCT_FEATURE: 'New Product/Feature',
+  INCIDENT_REMEDIATION: 'Incident Response/Remediation',
   OTHER: 'Other',
+}
+
+export const CATEGORY_DESCRIPTIONS: Record<SignOffCategory, string> = {
+  NEW_VENDOR_SUPPLIER: 'Bringing in a new SaaS tool, service provider, or software vendor',
+  EXISTING_VENDOR_CHANGE: 'Scope change, new data access, or tier upgrade for an existing vendor',
+  AI_ML_USAGE: 'Any use of AI features, LLMs, or automated decision-making — in-house or third-party',
+  DATA_HANDLING_CHANGE: 'New data flows, changes to where or how data is stored, or new data sharing arrangements',
+  INFRASTRUCTURE_CHANGE: 'New cloud services, network changes, or significant technical architecture changes',
+  NEW_PRODUCT_FEATURE: 'Launching something new with security implications — customer-facing or internal',
+  INCIDENT_REMEDIATION: 'Post-incident changes that need security sign-off',
+  OTHER: 'Anything that doesn\'t fit the above categories',
 }
 
 export const STATUS_LABELS: Record<string, string> = {
   DRAFT: 'Draft',
-  SUBMITTED: 'Submitted',
+  SUBMITTED: 'Awaiting Review',
   HAS_COMMENTS: 'Has Comments',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
@@ -102,12 +107,9 @@ export function getRiskLevel(score: number): 'low' | 'medium' | 'high' | 'critic
 
 export function getRiskAssessmentRequirement(
   categories: SignOffCategory[],
-): 'required' | 'recommended' | 'optional' {
+): 'required' | 'optional' {
   if (categories.some((c) => RISK_ASSESSMENT_REQUIRED_CATEGORIES.includes(c))) {
     return 'required'
-  }
-  if (categories.some((c) => RISK_ASSESSMENT_RECOMMENDED_CATEGORIES.includes(c))) {
-    return 'recommended'
   }
   return 'optional'
 }

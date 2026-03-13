@@ -2,20 +2,35 @@
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
 import {
+  AlertTriangle,
   ArrowLeft,
   CalendarDays,
   ExternalLink,
   FileText,
   FlaskConical,
   Globe,
+  Info,
   Pencil,
   Plus,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { TrialBadge } from '@/components/shared/trial-badge'
 import { CategoryBadge } from '@/components/shared/category-badge'
@@ -25,7 +40,7 @@ import { SignOffSidebar } from '@/components/sign-offs/sign-off-sidebar'
 import { SignOffTimeline } from '@/components/sign-offs/sign-off-timeline'
 import { SignOffComments } from '@/components/sign-offs/sign-off-comments'
 import { useCurrentUser } from '@/providers/user-provider'
-import { createRolloutAction } from '@/app/actions/sign-offs'
+import { createRolloutAction, closeTrialAction, extendTrialAction } from '@/app/actions/sign-offs'
 import {
   formatSequenceNumber,
   formatDateTime,
@@ -39,7 +54,7 @@ import {
 } from '@/lib/constants'
 import { toast } from 'sonner'
 import { useTransition } from 'react'
-import type { SignOffRequest, RiskAssessment } from '@/types'
+import type { SignOffRequest, RiskAssessment, TrialOutcome } from '@/types'
 
 interface SignOffDetailProps {
   signOff: SignOffRequest
@@ -111,7 +126,7 @@ function RiskAssessmentSummary({ risk }: { risk: RiskAssessment }) {
             {unknown ? (
               <Badge
                 variant="outline"
-                className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] text-xs dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]"
+                className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] text-xs dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10 dark:text-[#fcd34d]"
               >
                 Unknown
               </Badge>
@@ -133,7 +148,7 @@ function RiskAssessmentSummary({ risk }: { risk: RiskAssessment }) {
             {unknown ? (
               <Badge
                 variant="outline"
-                className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] text-xs dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]"
+                className="border-[#FFB900] bg-[#fef3c7] text-[#92400e] text-xs dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10 dark:text-[#fcd34d]"
               >
                 Unknown
               </Badge>
@@ -200,17 +215,43 @@ function RiskAssessmentSummary({ risk }: { risk: RiskAssessment }) {
   )
 }
 
+const CLOSURE_REASON_CHIPS = [
+  "Didn't meet success criteria",
+  'Vendor pulled out',
+  'Budget not approved',
+  'Security concerns unresolved',
+]
+
 export function SignOffDetail({ signOff }: SignOffDetailProps) {
   const { currentUser } = useCurrentUser()
   const router = useRouter()
   const [isCreatingRollout, startRolloutTransition] = useTransition()
+  const [isClosingTrial, startCloseTransition] = useTransition()
+  const [isExtendingTrial, startExtendTransition] = useTransition()
+
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false)
+  const [closeReason, setCloseReason] = useState('')
+  const [extendDialogOpen, setExtendDialogOpen] = useState(false)
+  const [extendDate, setExtendDate] = useState('')
+  const [extendReason, setExtendReason] = useState('')
 
   const isSubmitter = signOff.submittedBy.id === currentUser.id
+  const isAdmin = currentUser.role === 'APPROVER' || currentUser.role === 'COUNCIL_MEMBER'
   const canEdit =
     (signOff.status === 'DRAFT') ||
     (isSubmitter && (signOff.status === 'HAS_COMMENTS' || signOff.status === 'WITHDRAWN'))
-  const showCreateRollout =
-    signOff.isTrial && signOff.status === 'APPROVED' && isSubmitter
+
+  const trialOutcome = signOff.trialOutcome as TrialOutcome | undefined
+  const isTrialPending = signOff.isTrial && signOff.status === 'APPROVED' &&
+    (!trialOutcome || trialOutcome === 'PENDING')
+  const canActOnTrial = isTrialPending && (isSubmitter || isAdmin)
+
+  const showCreateRollout = canActOnTrial
+  const showCloseTrial = canActOnTrial
+  const showExtendTrial = canActOnTrial
+
+  const isTrialOverdue = isTrialPending && signOff.trialEndDate &&
+    new Date(signOff.trialEndDate) < new Date()
 
   function handleCreateRollout() {
     startRolloutTransition(async () => {
@@ -220,6 +261,37 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
         router.push(signOffUrl(result.signOff))
       } else {
         toast.error(result.error ?? 'Failed to create rollout request')
+      }
+    })
+  }
+
+  function handleCloseTrial() {
+    if (!closeReason.trim()) return
+    startCloseTransition(async () => {
+      const result = await closeTrialAction(signOff.id, currentUser.id, closeReason.trim())
+      if (result.success) {
+        toast.success('Trial closed')
+        setCloseDialogOpen(false)
+        setCloseReason('')
+        router.refresh()
+      } else {
+        toast.error(result.error ?? 'Failed to close trial')
+      }
+    })
+  }
+
+  function handleExtendTrial() {
+    if (!extendDate || !extendReason.trim()) return
+    startExtendTransition(async () => {
+      const result = await extendTrialAction(signOff.id, currentUser.id, extendDate, extendReason.trim())
+      if (result.success) {
+        toast.success('Trial extended')
+        setExtendDialogOpen(false)
+        setExtendDate('')
+        setExtendReason('')
+        router.refresh()
+      } else {
+        toast.error(result.error ?? 'Failed to extend trial')
       }
     })
   }
@@ -234,6 +306,49 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
         <ArrowLeft className="h-4 w-4" />
         Back to Sign-Offs
       </Link>
+
+      {/* Trial resolution banners */}
+      {signOff.isTrial && trialOutcome === 'ROLLED_OUT' && (
+        <Card className="border-[#93c5fd] bg-[#eff6ff] dark:border-[#3b82f6]/30 dark:bg-[#3b82f6]/10">
+          <CardContent className="flex items-center gap-2 py-3">
+            <Info className="h-4 w-4 text-[#2563eb] dark:text-[#60a5fa]" />
+            <span className="text-sm">
+              Rollout request created
+              {signOff.childSignOffIds.length > 0 && (
+                <> &mdash; <Link
+                  href={`/sign-offs/${signOff.childSignOffIds[0]}`}
+                  className="font-medium text-[#6C33DA] hover:underline dark:text-[#c4b5fd]"
+                >
+                  View rollout
+                </Link></>
+              )}
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
+      {signOff.isTrial && trialOutcome === 'CLOSED' && (
+        <Card className="border-[#d1d5db] bg-[#f3f4f6] dark:border-[#4b5563] dark:bg-[#374151]/50">
+          <CardContent className="flex items-center gap-2 py-3">
+            <X className="h-4 w-4 text-[#6b7280] dark:text-[#9ca3af]" />
+            <span className="text-sm text-[#374151] dark:text-[#d1d5db]">
+              Trial closed{signOff.trialClosedAt && <> on {formatDateTime(signOff.trialClosedAt)}</>}
+              {signOff.trialClosureReason && <> &mdash; {signOff.trialClosureReason}</>}
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
+      {isTrialOverdue && (
+        <Card className="border-[#fca5a5] bg-[#fef2f2] dark:border-[#ef4444]/30 dark:bg-[#ef4444]/10">
+          <CardContent className="flex items-center gap-2 py-3">
+            <AlertTriangle className="h-4 w-4 text-[#dc2626] dark:text-[#f87171]" />
+            <span className="text-sm text-[#991b1b] dark:text-[#fca5a5]">
+              Trial ended on {formatDateTime(signOff.trialEndDate!)} &mdash; please create a rollout request or close this trial
+            </span>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -277,13 +392,31 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
           )}
         </div>
 
-        <div className="flex gap-2 shrink-0">
+        <div className="flex flex-wrap gap-2 shrink-0">
           {canEdit && (
             <Button variant="outline" asChild>
               <Link href={`/sign-offs/${signOff.id}/edit`}>
                 <Pencil className="h-4 w-4" />
                 Edit
               </Link>
+            </Button>
+          )}
+          {showExtendTrial && (
+            <Button
+              variant="outline"
+              onClick={() => setExtendDialogOpen(true)}
+            >
+              <CalendarDays className="h-4 w-4" />
+              Extend Trial
+            </Button>
+          )}
+          {showCloseTrial && (
+            <Button
+              variant="outline"
+              onClick={() => setCloseDialogOpen(true)}
+            >
+              <X className="h-4 w-4" />
+              Close Trial
             </Button>
           )}
           {showCreateRollout && (
@@ -297,6 +430,101 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
           )}
         </div>
       </div>
+
+      {/* Close Trial Dialog */}
+      <Dialog open={closeDialogOpen} onOpenChange={setCloseDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Close Trial</DialogTitle>
+            <DialogDescription>
+              Provide a reason for closing this trial. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {CLOSURE_REASON_CHIPS.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => setCloseReason(chip)}
+                  className="rounded-full border px-3 py-1 text-xs hover:bg-muted transition-colors"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="close-reason">Reason</Label>
+              <Textarea
+                id="close-reason"
+                value={closeReason}
+                onChange={(e) => setCloseReason(e.target.value)}
+                placeholder="Why is this trial being closed?"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCloseDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCloseTrial}
+              disabled={!closeReason.trim() || isClosingTrial}
+            >
+              {isClosingTrial ? 'Closing...' : 'Close Trial'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extend Trial Dialog */}
+      <Dialog open={extendDialogOpen} onOpenChange={setExtendDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Extend Trial</DialogTitle>
+            <DialogDescription>
+              Set a new end date and provide a reason for the extension.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="extend-date">New End Date</Label>
+              <Input
+                id="extend-date"
+                type="date"
+                value={extendDate}
+                onChange={(e) => setExtendDate(e.target.value)}
+                min={signOff.trialEndDate
+                  ? new Date(new Date(signOff.trialEndDate).getTime() + 86400000).toISOString().split('T')[0]
+                  : new Date().toISOString().split('T')[0]
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="extend-reason">Reason for Extension</Label>
+              <Textarea
+                id="extend-reason"
+                value={extendReason}
+                onChange={(e) => setExtendReason(e.target.value)}
+                placeholder="e.g. Need more time to evaluate, Waiting on vendor response"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExtendDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExtendTrial}
+              disabled={!extendDate || !extendReason.trim() || isExtendingTrial}
+            >
+              {isExtendingTrial ? 'Extending...' : 'Extend Trial'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Linked parent/child sign-off */}
       {signOff.parentSignOffId && (
@@ -318,7 +546,7 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
 
       {/* Trial fields with amber treatment */}
       {signOff.isTrial && (
-        <Card className="border-[#FFB900] bg-[#fef3c7]/50 dark:border-[#b45309] dark:bg-[#78350f]/50">
+        <Card className="border-[#FFB900] bg-[#fef3c7]/50 dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FlaskConical className="h-4 w-4 text-[#d97706] dark:text-[#fcd34d]" />

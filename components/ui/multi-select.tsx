@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 interface Option {
   value: string
   label: string
+  description?: string
 }
 
 interface MultiSelectProps {
@@ -68,7 +69,7 @@ export function MultiSelect({
           variant="outline"
           size="sm"
           className={cn(
-            'h-8 text-xs justify-between font-normal',
+            'h-9 text-sm justify-between font-normal',
             value.length > 0 && 'border-primary text-foreground',
             className,
           )}
@@ -77,7 +78,7 @@ export function MultiSelect({
           <ChevronDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[220px] p-2" align="start">
+      <PopoverContent className="w-[420px] max-w-[calc(100vw-2rem)] p-2" align="start">
         {searchable && (
           <div className="flex items-center gap-1.5 border-b pb-2 mb-2">
             <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -90,7 +91,7 @@ export function MultiSelect({
             />
           </div>
         )}
-        <div className="space-y-1 max-h-[200px] overflow-y-auto">
+        <div className="space-y-0.5 max-h-[320px] overflow-y-auto">
           {filteredOptions.length === 0 ? (
             <p className="px-2 py-1.5 text-sm text-muted-foreground">No results</p>
           ) : (
@@ -99,14 +100,20 @@ export function MultiSelect({
               return (
                 <label
                   key={option.value}
-                  className="flex items-center gap-2 rounded px-2 py-1.5 text-sm cursor-pointer hover:bg-muted"
+                  className="flex items-start gap-2.5 rounded-md px-2.5 py-2 text-sm cursor-pointer hover:bg-muted"
                 >
                   <Checkbox
                     checked={checked}
                     onCheckedChange={() => toggleOption(option.value)}
+                    className="mt-0.5"
                   />
-                  <span className="truncate">{option.label}</span>
-                  {checked && <Check className="ml-auto h-3.5 w-3.5 text-primary shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium block">{option.label}</span>
+                    {option.description && (
+                      <span className="text-xs text-muted-foreground leading-relaxed block mt-0.5">{option.description}</span>
+                    )}
+                  </div>
+                  {checked && <Check className="ml-auto h-4 w-4 text-primary shrink-0 mt-0.5" />}
                 </label>
               )
             })

@@ -59,6 +59,13 @@ const soIds = {
   openaiApi: 'so-openai-api',
   hubspotCrm: 'so-hubspot-crm',
   cursorIdeTrial: 'so-cursor-ide-trial',
+  // Additional trials
+  figmaTrial: 'so-figma-trial',
+  linearTrial: 'so-linear-trial',
+  grammarlySentinelTrial: 'so-grammarly-trial',
+  postmanTrial: 'so-postman-trial',
+  copilotRollout: 'so-copilot-rollout',
+  onePasswordTrial: 'so-1password-trial',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -267,7 +274,7 @@ async function main() {
       id: soIds.slackEnterprise,
       title: 'Slack Enterprise Grid - Organisation Upgrade',
       status: 'APPROVED',
-      categories: ['THIRD_PARTY_TOOL', 'SIGNIFICANT_CHANGE'],
+      categories: ['NEW_VENDOR_SUPPLIER', 'EXISTING_VENDOR_CHANGE'],
       vendorName: 'Slack Technologies (Salesforce)',
       vendorWebsite: 'https://slack.com/enterprise',
       description:
@@ -359,7 +366,7 @@ async function main() {
       id: soIds.notionWorkspace,
       title: 'Notion Enterprise - Company Knowledge Base',
       status: 'SUBMITTED',
-      categories: ['THIRD_PARTY_TOOL', 'NEW_SUPPLIER_SOFTWARE'],
+      categories: ['NEW_VENDOR_SUPPLIER'],
       vendorName: 'Notion Labs Inc.',
       vendorWebsite: 'https://notion.so',
       description:
@@ -437,7 +444,7 @@ async function main() {
       id: soIds.awsBedrock,
       title: 'AWS Bedrock - Foundation Model Access for Internal Tooling',
       status: 'DRAFT',
-      categories: ['AI_FUNCTIONALITY', 'TECHNICAL_INTEGRATION', 'DATA_SECURITY_IMPACT'],
+      categories: ['AI_ML_USAGE', 'INFRASTRUCTURE_CHANGE', 'DATA_HANDLING_CHANGE'],
       vendorName: 'Amazon Web Services',
       vendorWebsite: 'https://aws.amazon.com/bedrock/',
       description:
@@ -472,7 +479,7 @@ async function main() {
       id: soIds.copilotTrial,
       title: 'GitHub Copilot Business - Engineering Trial',
       status: 'APPROVED',
-      categories: ['AI_FUNCTIONALITY', 'THIRD_PARTY_TOOL'],
+      categories: ['AI_ML_USAGE', 'NEW_VENDOR_SUPPLIER'],
       vendorName: 'GitHub (Microsoft)',
       vendorWebsite: 'https://github.com/features/copilot',
       description:
@@ -488,6 +495,7 @@ async function main() {
       trialSuccessCriteria: '20% improvement in PR throughput. Positive developer satisfaction score (>7/10). No security incidents.',
       trialGoLiveRolloutPlan: 'If successful, expand to all 45 engineering staff. Submit separate full rollout sign-off.',
       trialEndDate: daysAgo(-30),
+      trialOutcome: 'PENDING',
       submittedById: userIds.andrewPhillips,
       departmentId: deptIds.engineering,
       contentVersion: 1,
@@ -566,7 +574,7 @@ async function main() {
       id: soIds.snykSecurity,
       title: 'Snyk - Application Security Testing Platform',
       status: 'HAS_COMMENTS',
-      categories: ['NEW_SUPPLIER_SOFTWARE', 'THIRD_PARTY_TOOL'],
+      categories: ['NEW_VENDOR_SUPPLIER'],
       vendorName: 'Snyk Ltd',
       vendorWebsite: 'https://snyk.io',
       description:
@@ -662,7 +670,7 @@ async function main() {
       id: soIds.stripeConnect,
       title: 'Stripe Connect - Marketplace Payments Integration',
       status: 'REJECTED',
-      categories: ['TECHNICAL_INTEGRATION', 'DATA_SECURITY_IMPACT', 'NEW_PRODUCT_PLATFORM'],
+      categories: ['INFRASTRUCTURE_CHANGE', 'DATA_HANDLING_CHANGE', 'NEW_PRODUCT_FEATURE'],
       vendorName: 'Stripe Inc.',
       vendorWebsite: 'https://stripe.com/connect',
       description:
@@ -742,7 +750,7 @@ async function main() {
       id: soIds.datadogApm,
       title: 'Datadog APM - Application Performance Monitoring',
       status: 'SUBMITTED',
-      categories: ['THIRD_PARTY_TOOL', 'TECHNICAL_INTEGRATION'],
+      categories: ['NEW_VENDOR_SUPPLIER', 'INFRASTRUCTURE_CHANGE'],
       vendorName: 'Datadog Inc.',
       vendorWebsite: 'https://www.datadoghq.com',
       description:
@@ -786,7 +794,7 @@ async function main() {
       id: soIds.openaiApi,
       title: 'OpenAI API - Customer Support Chatbot',
       status: 'WITHDRAWN',
-      categories: ['AI_FUNCTIONALITY', 'DATA_SECURITY_IMPACT', 'NEW_PRODUCT_PLATFORM'],
+      categories: ['AI_ML_USAGE', 'DATA_HANDLING_CHANGE', 'NEW_PRODUCT_FEATURE'],
       vendorName: 'OpenAI',
       vendorWebsite: 'https://openai.com',
       description:
@@ -837,7 +845,7 @@ async function main() {
       id: soIds.hubspotCrm,
       title: 'HubSpot CRM - Marketing Automation Platform',
       status: 'DRAFT',
-      categories: ['NEW_SUPPLIER_SOFTWARE', 'THIRD_PARTY_TOOL', 'DATA_SECURITY_IMPACT'],
+      categories: ['NEW_VENDOR_SUPPLIER', 'DATA_HANDLING_CHANGE'],
       vendorName: 'HubSpot Inc.',
       vendorWebsite: 'https://www.hubspot.com',
       description:
@@ -872,7 +880,7 @@ async function main() {
       id: soIds.cursorIdeTrial,
       title: 'Cursor IDE - AI-Powered Development Environment Trial',
       status: 'SUBMITTED',
-      categories: ['AI_FUNCTIONALITY', 'THIRD_PARTY_TOOL'],
+      categories: ['AI_ML_USAGE', 'NEW_VENDOR_SUPPLIER'],
       vendorName: 'Anysphere Inc.',
       vendorWebsite: 'https://cursor.com',
       description:
@@ -888,6 +896,7 @@ async function main() {
       trialSuccessCriteria: 'Developer satisfaction survey (>7/10). Feature comparison vs Copilot documented. No security incidents.',
       trialGoLiveRolloutPlan: 'If preferred over Copilot, submit full rollout sign-off to replace Copilot licences.',
       trialEndDate: daysAgo(-25),
+      trialOutcome: 'PENDING',
       submittedById: userIds.oliverBennett,
       departmentId: deptIds.engineering,
       contentVersion: 1,
@@ -946,6 +955,309 @@ async function main() {
     data: [
       { signOffId: soIds.cursorIdeTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.oliverBennett, createdAt: daysAgo(5) },
       { signOffId: soIds.cursorIdeTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.oliverBennett, createdAt: daysAgo(2) },
+    ],
+  })
+
+  // --- 11. Figma Enterprise Trial - APPROVED, PENDING, end date in future (test: extend / close / create rollout) ---
+  await prisma.signOff.create({
+    data: {
+      id: soIds.figmaTrial,
+      title: 'Figma Enterprise - Design Platform Trial',
+      status: 'APPROVED',
+      categories: ['NEW_VENDOR_SUPPLIER'],
+      vendorName: 'Figma Inc.',
+      vendorWebsite: 'https://figma.com',
+      description:
+        'Trial Figma Enterprise for the Product and Design teams. Currently using Sketch + InVision which lack real-time collaboration. Figma will be evaluated for UI design, prototyping, and design system management.',
+      dueDiligence:
+        'Figma is SOC 2 Type II certified, supports SAML SSO, and offers EU data residency. Used widely across fintech companies including Revolut and Monzo.',
+      rollOutPlan:
+        'Enable Figma Enterprise seats for 8 designers and 4 product managers. Migrate one active project from Sketch to evaluate import fidelity and workflow.',
+      cost: '£75/user/month (Enterprise). Trial cost: £2,700 for 3 months (12 users).',
+      isTrial: true,
+      trialDuration: '3 months',
+      trialDataAccessScope: 'Design files only. No access to production code or customer data.',
+      trialSuccessCriteria: 'Design team adoption >80%. Successful migration of at least 2 Sketch projects. Positive satisfaction score (>8/10).',
+      trialGoLiveRolloutPlan: 'If successful, roll out to all design and product staff (~30 users). Decommission Sketch licences.',
+      trialEndDate: daysAgo(-45),
+      trialOutcome: 'PENDING',
+      submittedById: userIds.rachelChen,
+      departmentId: deptIds.product,
+      contentVersion: 1,
+      createdAt: daysAgo(30),
+      updatedAt: daysAgo(20),
+    },
+  })
+  await assignFixedApprovers(soIds.figmaTrial)
+
+  for (const approverId of fixedApproverIds) {
+    await prisma.signOffApproval.create({
+      data: {
+        signOffId: soIds.figmaTrial,
+        approverId,
+        decision: 'APPROVED',
+        comment: 'Approved. Good use case for real-time collaboration.',
+        contentVersion: 1,
+        createdAt: daysAgo(22),
+      },
+    })
+  }
+
+  await prisma.signOffStatusChange.createMany({
+    data: [
+      { signOffId: soIds.figmaTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.rachelChen, createdAt: daysAgo(30) },
+      { signOffId: soIds.figmaTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.rachelChen, createdAt: daysAgo(25) },
+      { signOffId: soIds.figmaTrial, fromStatus: 'SUBMITTED', toStatus: 'APPROVED', changedById: userIds.garyMason, createdAt: daysAgo(20) },
+    ],
+  })
+
+  // --- 12. Linear Trial - APPROVED, PENDING, end date passed (overdue — test: extend or close) ---
+  await prisma.signOff.create({
+    data: {
+      id: soIds.linearTrial,
+      title: 'Linear - Project Management Tool Trial',
+      status: 'APPROVED',
+      categories: ['NEW_VENDOR_SUPPLIER'],
+      vendorName: 'Linear Orbit Inc.',
+      vendorWebsite: 'https://linear.app',
+      description:
+        'Trial Linear as a replacement for Jira for the Engineering and Product teams. Linear offers a faster, more developer-focused project management experience with native GitHub and Slack integrations.',
+      dueDiligence:
+        'Linear is SOC 2 Type II certified. Data stored on AWS with encryption at rest and in transit. SAML SSO supported. Used by companies like Vercel, Coinbase, and Cash App.',
+      rollOutPlan:
+        'Migrate one engineering squad (6 people) to Linear for 4 weeks. Run in parallel with Jira to compare velocity tracking and developer satisfaction.',
+      cost: '£8/user/month (Standard). Trial cost: £192 total for 4 weeks (6 users).',
+      isTrial: true,
+      trialDuration: '4 weeks',
+      trialDataAccessScope: 'Project management data only — tickets, epics, roadmaps. No code or customer data.',
+      trialSuccessCriteria: 'Developer satisfaction >8/10 vs Jira. No loss of workflow capability. GitHub integration working end-to-end.',
+      trialGoLiveRolloutPlan: 'If preferred, migrate all engineering squads in phases. Decommission Jira over 3 months.',
+      trialEndDate: daysAgo(5),
+      trialOutcome: 'PENDING',
+      submittedById: userIds.liamCarter,
+      departmentId: deptIds.engineering,
+      contentVersion: 1,
+      createdAt: daysAgo(40),
+      updatedAt: daysAgo(35),
+    },
+  })
+  await assignFixedApprovers(soIds.linearTrial)
+
+  for (const approverId of fixedApproverIds) {
+    await prisma.signOffApproval.create({
+      data: {
+        signOffId: soIds.linearTrial,
+        approverId,
+        decision: 'APPROVED',
+        comment: 'Approved. Low cost and well-scoped trial.',
+        contentVersion: 1,
+        createdAt: daysAgo(36),
+      },
+    })
+  }
+
+  await prisma.signOffStatusChange.createMany({
+    data: [
+      { signOffId: soIds.linearTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.liamCarter, createdAt: daysAgo(40) },
+      { signOffId: soIds.linearTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.liamCarter, createdAt: daysAgo(38) },
+      { signOffId: soIds.linearTrial, fromStatus: 'SUBMITTED', toStatus: 'APPROVED', changedById: userIds.andrewPhillips, createdAt: daysAgo(35) },
+    ],
+  })
+
+  // --- 13. Grammarly Business Trial - APPROVED, CLOSED (test: view closed state) ---
+  await prisma.signOff.create({
+    data: {
+      id: soIds.grammarlySentinelTrial,
+      title: 'Grammarly Business - Writing Assistant Trial',
+      status: 'APPROVED',
+      categories: ['NEW_VENDOR_SUPPLIER', 'AI_ML_USAGE'],
+      vendorName: 'Grammarly Inc.',
+      vendorWebsite: 'https://grammarly.com',
+      description:
+        'Trial Grammarly Business for the Marketing and Customer Success teams to improve consistency and quality of external communications, email templates, and help centre articles.',
+      dueDiligence:
+        'Grammarly Business is SOC 2 Type II and ISO 27001 certified. Enterprise plan offers admin controls and prevents data being used for model training. SAML SSO supported.',
+      rollOutPlan:
+        'Provide Grammarly Business licences to 10 users across Marketing and Customer Success for 6 weeks.',
+      cost: '£15/user/month. Trial cost: £900 total for 6 weeks (10 users).',
+      isTrial: true,
+      trialDuration: '6 weeks',
+      trialDataAccessScope: 'Text input in browser extensions and desktop app. No access to internal systems or code.',
+      trialSuccessCriteria: 'Measurable improvement in email response quality scores. User satisfaction >7/10.',
+      trialGoLiveRolloutPlan: 'If successful, expand to all customer-facing teams (~50 users).',
+      trialEndDate: daysAgo(10),
+      trialOutcome: 'CLOSED',
+      trialClosureReason: "Didn't meet success criteria — adoption was low and users preferred existing tools.",
+      trialClosedAt: daysAgo(8),
+      submittedById: userIds.katieFord,
+      departmentId: deptIds.marketing,
+      contentVersion: 1,
+      createdAt: daysAgo(55),
+      updatedAt: daysAgo(8),
+    },
+  })
+  await assignFixedApprovers(soIds.grammarlySentinelTrial)
+
+  for (const approverId of fixedApproverIds) {
+    await prisma.signOffApproval.create({
+      data: {
+        signOffId: soIds.grammarlySentinelTrial,
+        approverId,
+        decision: 'APPROVED',
+        comment: 'Approved.',
+        contentVersion: 1,
+        createdAt: daysAgo(50),
+      },
+    })
+  }
+
+  await prisma.signOffStatusChange.createMany({
+    data: [
+      { signOffId: soIds.grammarlySentinelTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.katieFord, createdAt: daysAgo(55) },
+      { signOffId: soIds.grammarlySentinelTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.katieFord, createdAt: daysAgo(52) },
+      { signOffId: soIds.grammarlySentinelTrial, fromStatus: 'SUBMITTED', toStatus: 'APPROVED', changedById: userIds.garyMason, createdAt: daysAgo(48) },
+      { signOffId: soIds.grammarlySentinelTrial, fromStatus: 'APPROVED', toStatus: 'APPROVED', changedById: userIds.katieFord, reason: "Trial closed: Didn't meet success criteria — adoption was low and users preferred existing tools.", createdAt: daysAgo(8) },
+    ],
+  })
+
+  // --- 14. Postman Enterprise Trial - APPROVED, ROLLED_OUT with child rollout (test: view rolled out state) ---
+  await prisma.signOff.create({
+    data: {
+      id: soIds.postmanTrial,
+      title: 'Postman Enterprise - API Development Platform Trial',
+      status: 'APPROVED',
+      categories: ['NEW_VENDOR_SUPPLIER', 'INFRASTRUCTURE_CHANGE'],
+      vendorName: 'Postman Inc.',
+      vendorWebsite: 'https://postman.com',
+      description:
+        'Trial Postman Enterprise for the Engineering team to standardise API development, testing, and documentation. Replace ad-hoc use of free Postman accounts with a centrally managed Enterprise workspace.',
+      dueDiligence:
+        'Postman is SOC 2 Type II certified. Enterprise plan provides SSO, audit logs, and private API network. Data stored on AWS with encryption.',
+      rollOutPlan:
+        'Set up Enterprise workspace for 10 backend engineers. Migrate existing collections from personal accounts. Evaluate collaboration features over 4 weeks.',
+      cost: '£49/user/month (Enterprise). Trial cost: £1,960 for 4 weeks (10 users).',
+      isTrial: true,
+      trialDuration: '4 weeks',
+      trialDataAccessScope: 'API specifications, test collections, and mock servers. No production credentials stored in Postman.',
+      trialSuccessCriteria: 'All trial participants actively using shared workspace. API documentation coverage >60% for trial team services.',
+      trialGoLiveRolloutPlan: 'Roll out to full engineering team (45 users). Integrate with CI/CD pipeline for automated API testing.',
+      trialEndDate: daysAgo(15),
+      trialOutcome: 'ROLLED_OUT',
+      submittedById: userIds.danielReeves,
+      departmentId: deptIds.data,
+      contentVersion: 1,
+      createdAt: daysAgo(50),
+      updatedAt: daysAgo(12),
+    },
+  })
+  await assignFixedApprovers(soIds.postmanTrial)
+
+  for (const approverId of fixedApproverIds) {
+    await prisma.signOffApproval.create({
+      data: {
+        signOffId: soIds.postmanTrial,
+        approverId,
+        decision: 'APPROVED',
+        comment: 'Approved. Good scope for trial.',
+        contentVersion: 1,
+        createdAt: daysAgo(45),
+      },
+    })
+  }
+
+  await prisma.signOffStatusChange.createMany({
+    data: [
+      { signOffId: soIds.postmanTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.danielReeves, createdAt: daysAgo(50) },
+      { signOffId: soIds.postmanTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.danielReeves, createdAt: daysAgo(48) },
+      { signOffId: soIds.postmanTrial, fromStatus: 'SUBMITTED', toStatus: 'APPROVED', changedById: userIds.andrewPhillips, createdAt: daysAgo(44) },
+    ],
+  })
+
+  // Child rollout sign-off for Postman trial
+  await prisma.signOff.create({
+    data: {
+      id: soIds.copilotRollout,
+      title: 'Rollout: Postman Enterprise - API Development Platform Trial',
+      status: 'DRAFT',
+      categories: ['NEW_VENDOR_SUPPLIER', 'INFRASTRUCTURE_CHANGE'],
+      vendorName: 'Postman Inc.',
+      vendorWebsite: 'https://postman.com',
+      description:
+        'Full rollout of Postman Enterprise to the entire engineering team following successful trial. Trial demonstrated strong adoption and measurable improvements in API documentation coverage.',
+      dueDiligence: '',
+      rollOutPlan: '',
+      cost: '£49/user/month (Enterprise). Annual cost for 45 users: £26,460.',
+      isTrial: false,
+      parentSignOffId: soIds.postmanTrial,
+      submittedById: userIds.danielReeves,
+      departmentId: deptIds.data,
+      contentVersion: 1,
+      createdAt: daysAgo(12),
+      updatedAt: daysAgo(12),
+    },
+  })
+  await assignFixedApprovers(soIds.copilotRollout)
+
+  await prisma.signOffStatusChange.create({
+    data: {
+      signOffId: soIds.copilotRollout,
+      fromStatus: null,
+      toStatus: 'DRAFT',
+      changedById: userIds.danielReeves,
+      createdAt: daysAgo(12),
+    },
+  })
+
+  // --- 15. 1Password Business Trial - APPROVED, PENDING, end date approaching (active — test: extend before it expires) ---
+  await prisma.signOff.create({
+    data: {
+      id: soIds.onePasswordTrial,
+      title: '1Password Business - Password Management Trial',
+      status: 'APPROVED',
+      categories: ['NEW_VENDOR_SUPPLIER'],
+      vendorName: '1Password (AgileBits Inc.)',
+      vendorWebsite: 'https://1password.com/business',
+      description:
+        'Trial 1Password Business as a company-wide password manager to replace LastPass. Motivated by recent LastPass security incidents and the need for better shared vault management across departments.',
+      dueDiligence:
+        '1Password is SOC 2 Type II, ISO 27001, and SOC 3 certified. Zero-knowledge architecture — 1Password cannot access customer vault data. SAML SSO and SCIM provisioning supported. No known security breaches.',
+      rollOutPlan:
+        'Deploy to IT team and Engineering leads first (15 users). Migrate shared vaults from LastPass. Evaluate browser extension and CLI integration.',
+      cost: '£7.99/user/month (Business). Trial cost: £480 for 4 weeks (15 users).',
+      isTrial: true,
+      trialDuration: '4 weeks',
+      trialDataAccessScope: 'Password vaults and secure notes. No integration with production systems during trial.',
+      trialSuccessCriteria: 'Successful migration of all shared vaults from LastPass. Zero password-related incidents during trial. User satisfaction >8/10.',
+      trialGoLiveRolloutPlan: 'Company-wide rollout to all 350 staff. Decommission LastPass within 2 weeks of go-live.',
+      trialEndDate: daysAgo(-3),
+      trialOutcome: 'PENDING',
+      submittedById: userIds.sophieTaylor,
+      departmentId: deptIds.product,
+      contentVersion: 1,
+      createdAt: daysAgo(20),
+      updatedAt: daysAgo(15),
+    },
+  })
+  await assignFixedApprovers(soIds.onePasswordTrial)
+
+  for (const approverId of fixedApproverIds) {
+    await prisma.signOffApproval.create({
+      data: {
+        signOffId: soIds.onePasswordTrial,
+        approverId,
+        decision: 'APPROVED',
+        comment: 'Approved. Good security posture and clear migration plan.',
+        contentVersion: 1,
+        createdAt: daysAgo(16),
+      },
+    })
+  }
+
+  await prisma.signOffStatusChange.createMany({
+    data: [
+      { signOffId: soIds.onePasswordTrial, fromStatus: null, toStatus: 'DRAFT', changedById: userIds.sophieTaylor, createdAt: daysAgo(20) },
+      { signOffId: soIds.onePasswordTrial, fromStatus: 'DRAFT', toStatus: 'SUBMITTED', changedById: userIds.sophieTaylor, createdAt: daysAgo(18) },
+      { signOffId: soIds.onePasswordTrial, fromStatus: 'SUBMITTED', toStatus: 'APPROVED', changedById: userIds.garyMason, createdAt: daysAgo(15) },
     ],
   })
 

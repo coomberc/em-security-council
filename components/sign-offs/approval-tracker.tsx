@@ -70,7 +70,7 @@ export function ApprovalTracker({ approvers, approvals, allUsers }: ApprovalTrac
         const avatarUrl = user?.avatarUrl
         const { status, approval } = getApproverStatus(assignment.userId, approvals)
         const isAutoApproved =
-          status === 'approved' && approval && assignment.isFixed
+          status === 'approved' && approval?.comment === 'Auto-approved (submitter is a fixed approver)'
 
         return (
           <div

@@ -31,7 +31,7 @@ import {
   getRiskLevel,
   getRiskAssessmentRequirement,
 } from '@/lib/constants'
-import { ShieldAlert, AlertTriangle, Info, Plus, Trash2 } from 'lucide-react'
+import { ShieldAlert, Info, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
@@ -70,6 +70,9 @@ export interface RiskFormData {
   complianceCertifications: string[]
   mitigationPlan: string
   residualRiskNotes: string
+  dataPrivacyNA: boolean
+  riskScoringNA: boolean
+  controlsNA: boolean
 }
 
 interface FormTabRiskProps {
@@ -80,7 +83,7 @@ interface FormTabRiskProps {
 
 const RISK_LEVEL_CONFIG = {
   low: { label: 'Low', className: 'bg-[#d1fae5] text-[#065f46] dark:bg-[#064e3b] dark:text-[#6ee7b7]' },
-  medium: { label: 'Medium', className: 'bg-[#fef3c7] text-[#92400e] dark:bg-[#78350f] dark:text-[#fcd34d]' },
+  medium: { label: 'Medium', className: 'bg-[#fef3c7] text-[#92400e] dark:bg-[#fbbf24]/10 dark:text-[#fcd34d]' },
   high: { label: 'High', className: 'bg-[#ffedd5] text-[#c2410c] dark:bg-[#7c2d12] dark:text-[#fdba74]' },
   critical: { label: 'Critical', className: 'bg-[#fee2e2] text-[#991b1b] dark:bg-[#7f1d1d] dark:text-[#fca5a5]' },
 }
@@ -101,10 +104,12 @@ export function FormTabRisk({ data, categories, onChange }: FormTabRiskProps) {
       {/* Requirement banner */}
       <RequirementBanner requirement={requirement} />
 
-      {/* Data Classification */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Data & Privacy</h3>
-
+      {/* Data & Privacy */}
+      <SectionWithNA
+        title="Data & Privacy"
+        isNA={data.dataPrivacyNA}
+        onNAChange={(v) => update({ dataPrivacyNA: v })}
+      >
         <FieldWithUnknown
           label="Data Classification"
           unknown={data.dataClassificationUnknown}
@@ -228,13 +233,16 @@ export function FormTabRisk({ data, categories, onChange }: FormTabRiskProps) {
             />
           </div>
         )}
-      </div>
+      </SectionWithNA>
 
       <Separator />
 
-      {/* Likelihood x Impact Matrix */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Risk Scoring</h3>
+      {/* Risk Scoring */}
+      <SectionWithNA
+        title="Risk Scoring"
+        isNA={data.riskScoringNA}
+        onNAChange={(v) => update({ riskScoringNA: v })}
+      >
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FieldWithUnknown
@@ -305,15 +313,18 @@ export function FormTabRisk({ data, categories, onChange }: FormTabRiskProps) {
             </Badge>
           </div>
         )}
-      </div>
+      </SectionWithNA>
 
       <Separator />
 
-      {/* Security Controls */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold">Security Controls</h3>
+      {/* Controls */}
+      <SectionWithNA
+        title="Controls"
+        isNA={data.controlsNA}
+        onNAChange={(v) => update({ controlsNA: v })}
+      >
         <p className="text-xs text-muted-foreground">
-          Indicate which security controls are in place. Check &quot;I don&apos;t know&quot; if uncertain.
+          Indicate which controls are in place. Check &quot;I don&apos;t know&quot; if uncertain.
         </p>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -371,37 +382,33 @@ export function FormTabRisk({ data, categories, onChange }: FormTabRiskProps) {
               update({ hasSsoUnknown: v, ...(v ? { hasSso: false } : {}) })
             }
           />
+          <SecurityControlField
+            label="Service Level Agreement (SLA)"
+            checked={data.hasSla}
+            unknown={data.hasSlaUnknown}
+            onCheckedChange={(v) => update({ hasSla: v })}
+            onUnknownChange={(v) =>
+              update({ hasSlaUnknown: v, ...(v ? { hasSla: false, slaDetails: '' } : {}) })
+            }
+          />
         </div>
 
-        {/* SLA */}
-        <FieldWithUnknown
-          label="Service Level Agreement (SLA)"
-          unknown={data.hasSlaUnknown}
-          onUnknownChange={(v) =>
-            update({ hasSlaUnknown: v, ...(v ? { hasSla: false, slaDetails: '' } : {}) })
-          }
-        >
+        {data.hasSla && !data.hasSlaUnknown && (
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={data.hasSla}
-                onCheckedChange={(checked) => update({ hasSla: checked === true })}
-                disabled={data.hasSlaUnknown}
-              />
-              <span className="text-sm">{data.hasSla ? 'Yes' : 'No'}</span>
-            </div>
-            {data.hasSla && !data.hasSlaUnknown && (
-              <Textarea
-                placeholder="Describe the SLA terms..."
-                value={data.slaDetails}
-                onChange={(e) => update({ slaDetails: e.target.value })}
-                rows={2}
-                className="text-sm"
-              />
-            )}
+            <Label htmlFor="slaDetails" className="text-xs font-medium">
+              SLA Details
+            </Label>
+            <Textarea
+              id="slaDetails"
+              placeholder="Describe the SLA terms..."
+              value={data.slaDetails}
+              onChange={(e) => update({ slaDetails: e.target.value })}
+              rows={2}
+              className="text-sm"
+            />
           </div>
-        </FieldWithUnknown>
-      </div>
+        )}
+      </SectionWithNA>
 
       <Separator />
 
@@ -459,6 +466,43 @@ export function FormTabRisk({ data, categories, onChange }: FormTabRiskProps) {
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
+
+function SectionWithNA({
+  title,
+  isNA,
+  onNAChange,
+  children,
+}: {
+  title: string
+  isNA: boolean
+  onNAChange: (v: boolean) => void
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold">{title}</h3>
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Switch
+            checked={isNA}
+            onCheckedChange={(v) => onNAChange(v === true)}
+            className="scale-75"
+          />
+          <span className="text-xs text-muted-foreground">N/A</span>
+        </label>
+      </div>
+      {isNA ? (
+        <div className="rounded-lg border border-dashed py-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Not applicable for this request
+          </p>
+        </div>
+      ) : (
+        children
+      )}
+    </div>
+  )
+}
 
 function FieldWithUnknown({
   label,
@@ -531,20 +575,13 @@ function SecurityControlField({
 
 const PREDEFINED_CERTS = [
   'ISO 27001',
-  'ISO 27017',
   'ISO 27018',
   'SOC 2 Type I',
   'SOC 2 Type II',
-  'SOC 3',
   'PCI DSS',
   'GDPR Compliant',
-  'HIPAA',
   'Cyber Essentials',
   'Cyber Essentials Plus',
-  'CSA STAR',
-  'FedRAMP',
-  'NIST 800-53',
-  'IASME Governance',
 ]
 
 function ComplianceCertsEditor({
@@ -642,7 +679,7 @@ function ComplianceCertsEditor({
 function RequirementBanner({
   requirement,
 }: {
-  requirement: 'required' | 'recommended' | 'optional'
+  requirement: 'required' | 'optional'
 }) {
   if (requirement === 'required') {
     return (
@@ -654,20 +691,6 @@ function RequirementBanner({
         <p className="mt-1 text-xs">
           You must complete this assessment before submitting based on the
           selected categories.
-        </p>
-      </div>
-    )
-  }
-
-  if (requirement === 'recommended') {
-    return (
-      <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] px-3 py-2 text-sm text-[#92400e] dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Risk assessment is recommended</span>
-        </div>
-        <p className="mt-1 text-xs">
-          Completing this assessment is strongly encouraged for faster review.
         </p>
       </div>
     )

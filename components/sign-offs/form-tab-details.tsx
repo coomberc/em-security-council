@@ -42,7 +42,7 @@ export function FormTabDetails({ data, isTrial, onChange }: FormTabDetailsProps)
     <div className="space-y-8">
       {/* Trial fields */}
       {isTrial && (
-        <div className="rounded-lg border-2 border-[#FFB900] bg-[#fef3c7]/50 p-5 space-y-4 dark:border-[#b45309] dark:bg-[#78350f]/30">
+        <div className="rounded-lg border-2 border-[#FFB900] bg-[#fef3c7]/50 p-5 space-y-4 dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10/30">
           <h3 className="text-sm font-semibold text-[#92400e] dark:text-[#fcd34d]">
             Trial / Pilot Details
           </h3>
