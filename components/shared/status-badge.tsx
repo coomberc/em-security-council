@@ -5,27 +5,27 @@ import type { SignOffStatus } from '@/types'
 const STATUS_CONFIG: Record<SignOffStatus, { label: string; className: string }> = {
   DRAFT: {
     label: 'Draft',
-    className: 'border-[#9ca3af] bg-[#e5e7eb] text-[#374151] dark:bg-[#374151]/50 dark:text-[#d1d5db] dark:border-[#4b5563]',
+    className: 'border-[#6b7280] bg-[#6b7280] text-white dark:bg-[#374151]/50 dark:text-[#d1d5db] dark:border-[#4b5563]',
   },
   SUBMITTED: {
     label: 'Submitted',
-    className: 'border-[#f59e0b] bg-[#fde68a] text-[#78350f] dark:bg-[#fbbf24]/10 dark:text-[#fbbf24] dark:border-[#fbbf24]/40',
+    className: 'border-[#d97706] bg-[#f59e0b] text-white dark:bg-[#fbbf24]/10 dark:text-[#fbbf24] dark:border-[#fbbf24]/40',
   },
   HAS_COMMENTS: {
     label: 'Has Comments',
-    className: 'border-[#f97316] bg-[#fed7aa] text-[#7c2d12] dark:bg-[#fb923c]/10 dark:text-[#fb923c] dark:border-[#fb923c]/40',
+    className: 'border-[#c2410c] bg-[#f97316] text-white dark:bg-[#fb923c]/10 dark:text-[#fb923c] dark:border-[#fb923c]/40',
   },
   APPROVED: {
     label: 'Approved',
-    className: 'border-[#34d399] bg-[#a7f3d0] text-[#065f46] dark:bg-[#34d399]/10 dark:text-[#34d399] dark:border-[#34d399]/40',
+    className: 'border-[#059669] bg-[#10b981] text-white dark:bg-[#34d399]/10 dark:text-[#34d399] dark:border-[#34d399]/40',
   },
   REJECTED: {
     label: 'Rejected',
-    className: 'border-[#f87171] bg-[#fecaca] text-[#991b1b] dark:bg-[#f87171]/10 dark:text-[#f87171] dark:border-[#f87171]/40',
+    className: 'border-[#dc2626] bg-[#ef4444] text-white dark:bg-[#f87171]/10 dark:text-[#f87171] dark:border-[#f87171]/40',
   },
   WITHDRAWN: {
     label: 'Withdrawn',
-    className: 'border-[#9ca3af] bg-[#e5e7eb] text-[#6b7280] dark:bg-[#6b7280]/10 dark:text-[#9ca3af] dark:border-[#6b7280]/40',
+    className: 'border-[#9ca3af] bg-[#9ca3af] text-white dark:bg-[#6b7280]/10 dark:text-[#9ca3af] dark:border-[#6b7280]/40',
   },
 }
 
