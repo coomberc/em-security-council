@@ -27,14 +27,13 @@ enum SignOffStatus {
 }
 
 enum SignOffCategory {
-  NEW_SUPPLIER_SOFTWARE
-  THIRD_PARTY_TOOL
-  SCOPE_CHANGE
-  NEW_PRODUCT_PLATFORM
-  SIGNIFICANT_CHANGE
-  TECHNICAL_INTEGRATION
-  AI_FUNCTIONALITY
-  DATA_SECURITY_IMPACT
+  NEW_VENDOR_SUPPLIER
+  EXISTING_VENDOR_CHANGE
+  AI_ML_USAGE
+  DATA_HANDLING_CHANGE
+  INFRASTRUCTURE_CHANGE
+  NEW_PRODUCT_FEATURE
+  INCIDENT_REMEDIATION
   OTHER
 }
 
@@ -42,6 +41,12 @@ enum ApprovalDecision {
   APPROVED
   REJECTED
   HAS_COMMENTS
+}
+
+enum TrialOutcome {
+  PENDING
+  ROLLED_OUT
+  CLOSED
 }
 
 enum RiskLikelihood {
@@ -129,6 +134,9 @@ model SignOff {
   trialSuccessCriteria  String?
   trialGoLiveRolloutPlan String?
   trialEndDate          DateTime?
+  trialOutcome          TrialOutcome?
+  trialClosureReason    String?
+  trialClosedAt         DateTime?
   parentSignOffId       String?
   contentVersion        Int              @default(1)
   submittedById         String
@@ -284,6 +292,9 @@ model RiskAssessment {
   complianceCertifications String[]
   mitigationPlan         String?
   residualRiskNotes      String?
+  dataPrivacyNA          Boolean           @default(false)
+  riskScoringNA          Boolean           @default(false)
+  controlsNA             Boolean           @default(false)
 
   signOff SignOff @relation(fields: [signOffId], references: [id], onDelete: Cascade)
 

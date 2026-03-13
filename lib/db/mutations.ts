@@ -48,6 +48,7 @@ export async function createSignOff(
         trialSuccessCriteria: input.trialSuccessCriteria,
         trialGoLiveRolloutPlan: input.trialGoLiveRolloutPlan,
         trialEndDate: input.trialEndDate ? new Date(input.trialEndDate) : undefined,
+        trialOutcome: input.isTrial ? 'PENDING' : undefined,
         submittedById: userId,
         contentVersion: 1,
         statusHistory: {
@@ -138,6 +139,9 @@ export async function createSignOff(
           complianceCertifications: ra.complianceCertifications ?? [],
           mitigationPlan: ra.mitigationPlan,
           residualRiskNotes: ra.residualRiskNotes,
+          dataPrivacyNA: ra.dataPrivacyNA ?? false,
+          riskScoringNA: ra.riskScoringNA ?? false,
+          controlsNA: ra.controlsNA ?? false,
         },
       })
     }
@@ -512,6 +516,9 @@ export async function createRolloutFromTrial(
   if (!trial) throw new Error('Trial sign-off not found')
   if (trial.status !== 'APPROVED') throw new Error('Trial must be approved to create rollout')
   if (!trial.isTrial) throw new Error('Sign-off is not a trial')
+  if (trial.trialOutcome && trial.trialOutcome !== 'PENDING') {
+    throw new Error('Trial has already been resolved')
+  }
 
   const prisma = await getPrisma()
   const fixedApprovers = await prisma.user.findMany({
@@ -530,8 +537,8 @@ export async function createRolloutFromTrial(
         vendorName: trial.vendorName,
         vendorWebsite: trial.vendorWebsite,
         description: trial.description,
-        dueDiligence: '',
-        rollOutPlan: '',
+        dueDiligence: trial.dueDiligence,
+        rollOutPlan: trial.trialGoLiveRolloutPlan ?? trial.rollOutPlan,
         cost: trial.cost,
         isTrial: false,
         parentSignOffId: trialSignOffId,
@@ -559,6 +566,12 @@ export async function createRolloutFromTrial(
       })
     }
 
+    // Mark the trial as ROLLED_OUT
+    await tx.signOff.update({
+      where: { id: trialSignOffId },
+      data: { trialOutcome: 'ROLLED_OUT' },
+    })
+
     // Copy custom sections
     if (trial.customSections.length > 0) {
       await tx.signOffCustomSection.createMany({
@@ -583,12 +596,177 @@ export async function createRolloutFromTrial(
       })
     }
 
+    // Copy risk assessment
+    if (trial.riskAssessment) {
+      const ra = trial.riskAssessment
+      await tx.riskAssessment.create({
+        data: {
+          signOffId: created.id,
+          dataClassification: ra.dataClassification,
+          dataClassificationUnknown: ra.dataClassificationUnknown,
+          personalDataInvolved: ra.personalDataInvolved,
+          personalDataInvolvedUnknown: ra.personalDataInvolvedUnknown,
+          personalDataDetails: ra.personalDataDetails,
+          dataStorageLocation: ra.dataStorageLocation,
+          dataStorageLocationUnknown: ra.dataStorageLocationUnknown,
+          thirdPartyDataSharing: ra.thirdPartyDataSharing,
+          thirdPartyDataSharingUnknown: ra.thirdPartyDataSharingUnknown,
+          thirdPartyDataDetails: ra.thirdPartyDataDetails,
+          likelihoodOfBreach: ra.likelihoodOfBreach,
+          likelihoodOfBreachUnknown: ra.likelihoodOfBreachUnknown,
+          impactOfBreach: ra.impactOfBreach,
+          impactOfBreachUnknown: ra.impactOfBreachUnknown,
+          overallRiskScore: ra.overallRiskScore,
+          hasEncryptionAtRest: ra.hasEncryptionAtRest,
+          hasEncryptionAtRestUnknown: ra.hasEncryptionAtRestUnknown,
+          hasEncryptionInTransit: ra.hasEncryptionInTransit,
+          hasEncryptionInTransitUnknown: ra.hasEncryptionInTransitUnknown,
+          hasMfa: ra.hasMfa,
+          hasMfaUnknown: ra.hasMfaUnknown,
+          hasAuditLogging: ra.hasAuditLogging,
+          hasAuditLoggingUnknown: ra.hasAuditLoggingUnknown,
+          hasPenTestReport: ra.hasPenTestReport,
+          hasPenTestReportUnknown: ra.hasPenTestReportUnknown,
+          hasDisasterRecovery: ra.hasDisasterRecovery,
+          hasDisasterRecoveryUnknown: ra.hasDisasterRecoveryUnknown,
+          hasSso: ra.hasSso,
+          hasSsoUnknown: ra.hasSsoUnknown,
+          hasSla: ra.hasSla,
+          hasSlaUnknown: ra.hasSlaUnknown,
+          slaDetails: ra.slaDetails,
+          complianceCertifications: ra.complianceCertifications,
+          mitigationPlan: ra.mitigationPlan,
+          residualRiskNotes: ra.residualRiskNotes,
+          dataPrivacyNA: ra.dataPrivacyNA ?? false,
+          riskScoringNA: ra.riskScoringNA ?? false,
+          controlsNA: ra.controlsNA ?? false,
+        },
+      })
+    }
+
     return created
   })
 
   const hydrated = await getSignOffById(rollout.id)
   if (!hydrated) throw new Error('Failed to create rollout sign-off')
   return hydrated
+}
+
+// ---------------------------------------------------------------------------
+// closeTrialSignOff
+// ---------------------------------------------------------------------------
+
+export async function closeTrialSignOff(
+  signOffId: string,
+  userId: string,
+  reason: string,
+): Promise<void> {
+  const [signOff, user] = await Promise.all([
+    getSignOffById(signOffId),
+    getUserById(userId),
+  ])
+
+  if (!signOff) throw new Error('Sign-off not found')
+  if (!user) throw new Error('User not found')
+  if (signOff.status !== 'APPROVED') throw new Error('Sign-off must be approved')
+  if (!signOff.isTrial) throw new Error('Sign-off is not a trial')
+  if (signOff.trialOutcome && signOff.trialOutcome !== 'PENDING') {
+    throw new Error('Trial has already been resolved')
+  }
+
+  // Permission: submitter or admin (APPROVER/COUNCIL_MEMBER)
+  const isSubmitter = signOff.submittedBy.id === userId
+  const isAdmin = user.role === 'APPROVER' || user.role === 'COUNCIL_MEMBER'
+  if (!isSubmitter && !isAdmin) {
+    throw new Error('Only the submitter or an admin can close a trial')
+  }
+
+  const now = new Date()
+  const prisma = await getPrisma()
+
+  await prisma.$transaction(async (tx) => {
+    await tx.signOff.update({
+      where: { id: signOffId },
+      data: {
+        trialOutcome: 'CLOSED',
+        trialClosureReason: reason,
+        trialClosedAt: now,
+      },
+    })
+
+    await tx.signOffStatusChange.create({
+      data: {
+        signOffId,
+        fromStatus: 'APPROVED',
+        toStatus: 'APPROVED',
+        changedById: userId,
+        reason: `Trial closed: ${reason}`,
+        createdAt: now,
+      },
+    })
+  })
+}
+
+// ---------------------------------------------------------------------------
+// extendTrial
+// ---------------------------------------------------------------------------
+
+export async function extendTrial(
+  signOffId: string,
+  userId: string,
+  newEndDate: string,
+  reason: string,
+): Promise<void> {
+  const [signOff, user] = await Promise.all([
+    getSignOffById(signOffId),
+    getUserById(userId),
+  ])
+
+  if (!signOff) throw new Error('Sign-off not found')
+  if (!user) throw new Error('User not found')
+  if (signOff.status !== 'APPROVED') throw new Error('Sign-off must be approved')
+  if (!signOff.isTrial) throw new Error('Sign-off is not a trial')
+  if (signOff.trialOutcome && signOff.trialOutcome !== 'PENDING') {
+    throw new Error('Trial has already been resolved')
+  }
+
+  const parsedNewEndDate = new Date(newEndDate)
+  if (signOff.trialEndDate && parsedNewEndDate <= new Date(signOff.trialEndDate)) {
+    throw new Error('New end date must be after the current trial end date')
+  }
+
+  // Permission: submitter or admin (APPROVER/COUNCIL_MEMBER)
+  const isSubmitter = signOff.submittedBy.id === userId
+  const isAdmin = user.role === 'APPROVER' || user.role === 'COUNCIL_MEMBER'
+  if (!isSubmitter && !isAdmin) {
+    throw new Error('Only the submitter or an admin can extend a trial')
+  }
+
+  const now = new Date()
+  const prisma = await getPrisma()
+  const formattedDate = parsedNewEndDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+
+  await prisma.$transaction(async (tx) => {
+    await tx.signOff.update({
+      where: { id: signOffId },
+      data: { trialEndDate: parsedNewEndDate },
+    })
+
+    await tx.signOffStatusChange.create({
+      data: {
+        signOffId,
+        fromStatus: 'APPROVED',
+        toStatus: 'APPROVED',
+        changedById: userId,
+        reason: `Trial extended to ${formattedDate}: ${reason}`,
+        createdAt: now,
+      },
+    })
+  })
 }
 
 // ---------------------------------------------------------------------------

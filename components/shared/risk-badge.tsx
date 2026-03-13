@@ -8,7 +8,7 @@ const RISK_CONFIG = {
   },
   medium: {
     label: 'Medium Risk',
-    light: { bg: '#fde68a', text: '#78350f', border: '#f59e0b' },
+    light: { bg: '#fde68a', text: '#92400e', border: '#f59e0b' },
     dark: { bg: 'rgba(251,191,36,0.1)', text: '#fbbf24', border: 'rgba(251,191,36,0.4)' },
   },
   high: {

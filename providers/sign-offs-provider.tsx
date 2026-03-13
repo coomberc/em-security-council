@@ -1,7 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, useMemo, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCurrentUser } from '@/providers/user-provider'
 import type { SignOffSummary } from '@/types'
 
 interface SignOffsContextValue {
@@ -17,8 +18,17 @@ interface SignOffsProviderProps {
 }
 
 export function SignOffsProvider({ children, initialSignOffs }: SignOffsProviderProps) {
-  const [signOffs] = useState<SignOffSummary[]>(initialSignOffs)
   const router = useRouter()
+  const { currentUser } = useCurrentUser()
+
+  const signOffs = useMemo(() => {
+    // Staff members can only see their own sign-offs
+    if (currentUser.role === 'STAFF_MEMBER') {
+      return initialSignOffs.filter((s) => s.submittedBy.id === currentUser.id)
+    }
+    // Council members and approvers see all
+    return initialSignOffs
+  }, [initialSignOffs, currentUser.id, currentUser.role])
 
   const refresh = useCallback(() => {
     router.refresh()

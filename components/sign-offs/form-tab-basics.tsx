@@ -3,8 +3,6 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/badge'
-import { MultiSelect } from '@/components/ui/multi-select'
 import {
   Select,
   SelectContent,
@@ -16,9 +14,11 @@ import { useDepartments } from '@/providers/departments-provider'
 import { SIGN_OFF_CATEGORIES, type SignOffCategory } from '@/types'
 import {
   CATEGORY_LABELS,
+  CATEGORY_DESCRIPTIONS,
   getRiskAssessmentRequirement,
 } from '@/lib/constants'
-import { AlertTriangle, Info, ShieldAlert } from 'lucide-react'
+import { AlertTriangle, Check, Info, ShieldAlert } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export interface BasicsFormData {
   title: string
@@ -37,6 +37,7 @@ interface FormTabBasicsProps {
 const categoryOptions = SIGN_OFF_CATEGORIES.map((c) => ({
   value: c,
   label: CATEGORY_LABELS[c],
+  description: CATEGORY_DESCRIPTIONS[c],
 })).sort((a, b) => a.label.localeCompare(b.label))
 
 export function FormTabBasics({ data, onChange }: FormTabBasicsProps) {
@@ -89,30 +90,48 @@ export function FormTabBasics({ data, onChange }: FormTabBasicsProps) {
       </div>
 
       {/* Categories */}
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">
-          Categories <span className="text-destructive">*</span>
-        </Label>
-        <p className="text-xs text-muted-foreground">
-          Select all categories that apply to this request.
-        </p>
-        <MultiSelect
-          value={data.categories}
-          onChange={(values) => update({ categories: values as SignOffCategory[] })}
-          options={categoryOptions}
-          placeholder="Select categories"
-          searchable
-          className="w-full"
-        />
-        {data.categories.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-1">
-            {data.categories.map((cat) => (
-              <Badge key={cat} variant="secondary" className="text-xs">
-                {CATEGORY_LABELS[cat]}
-              </Badge>
-            ))}
-          </div>
-        )}
+      <div className="space-y-3">
+        <div>
+          <Label className="text-sm font-medium">
+            Categories <span className="text-destructive">*</span>
+          </Label>
+          <p className="text-xs text-muted-foreground mt-1">
+            Select all categories that apply to this request.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {categoryOptions.map((option) => {
+            const selected = data.categories.includes(option.value as SignOffCategory)
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  const cats = selected
+                    ? data.categories.filter((c) => c !== option.value)
+                    : [...data.categories, option.value as SignOffCategory]
+                  update({ categories: cats })
+                }}
+                className={cn(
+                  'relative text-left rounded-lg border p-3 transition-all',
+                  selected
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-border hover:border-muted-foreground/30 hover:bg-muted/50',
+                )}
+              >
+                {selected && (
+                  <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="h-3 w-3 text-primary-foreground" />
+                  </div>
+                )}
+                <span className="text-sm font-medium block pr-6">{option.label}</span>
+                <span className="text-xs text-muted-foreground leading-relaxed block mt-1">
+                  {option.description}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Risk assessment banner */}
@@ -164,11 +183,11 @@ export function FormTabBasics({ data, onChange }: FormTabBasicsProps) {
             className={data.isTrial ? 'data-[state=checked]:bg-[#f59e0b]' : ''}
           />
           <Label htmlFor="isTrial" className="text-sm font-medium cursor-pointer">
-            Is this a trial / pilot?
+            Is this a trial/pilot?
           </Label>
         </div>
         {data.isTrial && (
-          <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] px-3 py-2 text-xs text-[#92400e] dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]">
+          <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] px-3 py-2 text-xs text-[#92400e] dark:border-[#fbbf24]/30 dark:bg-[#fbbf24]/10 dark:text-[#fcd34d]">
             <div className="flex items-center gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
               <span>
@@ -186,7 +205,7 @@ export function FormTabBasics({ data, onChange }: FormTabBasicsProps) {
 function RiskAssessmentBanner({
   requirement,
 }: {
-  requirement: 'required' | 'recommended' | 'optional'
+  requirement: 'required' | 'optional'
 }) {
   if (requirement === 'required') {
     return (
@@ -198,21 +217,6 @@ function RiskAssessmentBanner({
         <p className="mt-1 text-xs">
           Based on the selected categories, a risk assessment must be completed
           before this request can be submitted.
-        </p>
-      </div>
-    )
-  }
-
-  if (requirement === 'recommended') {
-    return (
-      <div className="rounded-md border border-[#FFB900] bg-[#fef3c7] px-3 py-2 text-sm text-[#92400e] dark:border-[#b45309] dark:bg-[#78350f] dark:text-[#fcd34d]">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Risk assessment recommended</span>
-        </div>
-        <p className="mt-1 text-xs">
-          Based on the selected categories, completing a risk assessment is
-          strongly recommended for faster approval.
         </p>
       </div>
     )

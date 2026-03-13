@@ -1,11 +1,13 @@
 import { getDepartments } from '@/lib/db/queries'
 import { DepartmentManager } from './department-manager'
+import { AdminNav } from '@/components/admin/admin-nav'
 
 export default async function DepartmentsPage() {
   const departments = await getDepartments()
 
   return (
     <div className="space-y-6">
+      <AdminNav />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Departments</h1>
         <p className="text-muted-foreground text-sm">

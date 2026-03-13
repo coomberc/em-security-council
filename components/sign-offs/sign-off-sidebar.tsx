@@ -71,7 +71,7 @@ export function SignOffSidebar({ signOff }: SignOffSidebarProps) {
       </Card>
 
       {/* Unknown Risk Fields Warning (for approvers) */}
-      {isApprover && unknownFields.length > 0 && (
+      {isApprover && unknownFields.length > 0 && signOff.status !== 'APPROVED' && (
         <Card className="border-[#d97706] dark:border-[#fbbf24]/40">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base text-foreground">

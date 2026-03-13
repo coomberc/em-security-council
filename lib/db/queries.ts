@@ -13,6 +13,7 @@ import type {
   SignOffSupportingDoc,
   SignOffApproverAssignment,
   RiskAssessment,
+  TrialOutcome,
 } from '@/types'
 import type {
   User as PrismaUser,
@@ -99,6 +100,9 @@ function mapRiskAssessment(r: PrismaRiskAssessment): RiskAssessment {
     complianceCertifications: r.complianceCertifications,
     mitigationPlan: r.mitigationPlan ?? undefined,
     residualRiskNotes: r.residualRiskNotes ?? undefined,
+    dataPrivacyNA: r.dataPrivacyNA,
+    riskScoringNA: r.riskScoringNA,
+    controlsNA: r.controlsNA,
   }
 }
 
@@ -116,6 +120,7 @@ type PrismaSignOffWithIncludes = PrismaSignOff & {
   customSections: PrismaCustomSection[]
   supportingDocs: (PrismaSupportingDoc & { addedBy: PrismaUser })[]
   riskAssessment: PrismaRiskAssessment | null
+  childSignOffs: { id: string }[]
 }
 
 function mapSignOff(r: PrismaSignOffWithIncludes): SignOffRequest {
@@ -137,6 +142,9 @@ function mapSignOff(r: PrismaSignOffWithIncludes): SignOffRequest {
     trialSuccessCriteria: r.trialSuccessCriteria ?? undefined,
     trialGoLiveRolloutPlan: r.trialGoLiveRolloutPlan ?? undefined,
     trialEndDate: r.trialEndDate?.toISOString(),
+    trialOutcome: r.trialOutcome ?? undefined,
+    trialClosureReason: r.trialClosureReason ?? undefined,
+    trialClosedAt: r.trialClosedAt?.toISOString(),
     parentSignOffId: r.parentSignOffId ?? undefined,
     contentVersion: r.contentVersion,
     submittedBy: mapUser(r.submittedBy),
@@ -150,6 +158,7 @@ function mapSignOff(r: PrismaSignOffWithIncludes): SignOffRequest {
     comments: r.comments.map(mapComment),
     statusHistory: r.statusHistory.map(mapStatusChange),
     riskAssessment: r.riskAssessment ? mapRiskAssessment(r.riskAssessment) : undefined,
+    childSignOffIds: r.childSignOffs.map((c) => c.id),
   }
 }
 
@@ -253,6 +262,9 @@ const signOffIncludes = {
     orderBy: { createdAt: 'asc' as const },
   },
   riskAssessment: true,
+  childSignOffs: {
+    select: { id: true },
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -303,6 +315,8 @@ function mapSignOffSummary(r: PrismaSignOffSummaryRow): SignOffSummary {
     vendorName: r.vendorName ?? undefined,
     isTrial: r.isTrial,
     trialEndDate: r.trialEndDate?.toISOString(),
+    trialOutcome: (r.trialOutcome as TrialOutcome) ?? undefined,
+    parentSignOffId: r.parentSignOffId ?? undefined,
     submittedBy: { id: r.submittedBy.id, name: r.submittedBy.name },
     department: mapDepartment(r.department),
     createdAt: r.createdAt.toISOString(),

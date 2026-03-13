@@ -32,7 +32,7 @@ const TRANSITION_MAP: Record<SignOffStatus, SignOffAction[]> = {
   DRAFT: ['submit', 'withdraw'],
   SUBMITTED: ['approve', 'comment', 'reject', 'withdraw'],
   HAS_COMMENTS: ['resubmit', 'withdraw'],
-  APPROVED: [],
+  APPROVED: ['reopen'],
   REJECTED: [],
   WITHDRAWN: ['reopen'],
 }
@@ -185,6 +185,15 @@ export function canPerformAction(
     }
 
     case 'reopen': {
+      // From APPROVED: only fixed approvers can reopen
+      if (signOff.status === 'APPROVED') {
+        const isFixedApprover = signOff.approvers.some((a) => a.userId === user.id && a.isFixed)
+        if (!isFixedApprover) {
+          return { allowed: false, reason: 'Only fixed approvers can reopen an approved sign-off' }
+        }
+        return { allowed: true }
+      }
+      // From WITHDRAWN: submitter can reopen
       if (!isSubmitter(user, signOff)) {
         return { allowed: false, reason: 'Only the submitter can reopen this sign-off' }
       }

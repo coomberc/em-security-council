@@ -26,7 +26,8 @@ import type {
   RiskLikelihood,
   RiskImpact,
 } from '@/types'
-import { Save, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { ArrowLeft, Save, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -115,6 +116,9 @@ function getInitialRisk(existing?: SignOffRequest): RiskFormData {
     complianceCertifications: ra?.complianceCertifications ?? [],
     mitigationPlan: ra?.mitigationPlan ?? '',
     residualRiskNotes: ra?.residualRiskNotes ?? '',
+    dataPrivacyNA: ra?.dataPrivacyNA ?? false,
+    riskScoringNA: ra?.riskScoringNA ?? false,
+    controlsNA: ra?.controlsNA ?? false,
   }
 }
 
@@ -178,6 +182,9 @@ function buildRiskInput(risk: RiskFormData): CreateRiskAssessmentInput | undefin
     complianceCertifications: risk.complianceCertifications,
     mitigationPlan: risk.mitigationPlan || undefined,
     residualRiskNotes: risk.residualRiskNotes || undefined,
+    dataPrivacyNA: risk.dataPrivacyNA,
+    riskScoringNA: risk.riskScoringNA,
+    controlsNA: risk.controlsNA,
   }
 }
 
@@ -406,11 +413,22 @@ export function SignOffForm({ existingSignOff }: SignOffFormProps) {
     }
   }
 
+  const backHref = signOffId ? `/sign-offs/${signOffId}` : '/sign-offs'
+
   return (
     <div className="space-y-4">
+      {/* Back link */}
+      <Link
+        href={backHref}
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {signOffId ? 'Back to Sign-Off' : 'Back to Sign-Offs'}
+      </Link>
+
       {/* Draft recovery banner */}
       {hasDraft && recoveredDraft && (
-        <div className="rounded-md border border-[#d1d5db] bg-[#f9fafb] p-4 dark:border-[#4b5563] dark:bg-[#1f2937]">
+        <div className="rounded-md border border-[#d1d5db] bg-[#f9fafb] p-4 dark:border-[#fbbf24]/40 dark:bg-[#fbbf24]/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-foreground">
               <AlertTriangle className="h-4 w-4 shrink-0" />

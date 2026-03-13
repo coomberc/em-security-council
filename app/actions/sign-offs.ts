@@ -8,6 +8,8 @@ import {
   addComment as dbAddComment,
   addApprover as dbAddApprover,
   createRolloutFromTrial as dbCreateRolloutFromTrial,
+  closeTrialSignOff as dbCloseTrialSignOff,
+  extendTrial as dbExtendTrial,
 } from '@/lib/db/mutations'
 import { getSignOffById } from '@/lib/db/queries'
 import { resolveActingUserId } from '@/lib/auth'
@@ -107,6 +109,39 @@ export async function createRolloutAction(
     const signOff = await dbCreateRolloutFromTrial(trialSignOffId, actingUserId)
     revalidatePath('/sign-offs')
     return { success: true, signOff }
+  } catch (e) {
+    return { success: false, error: (e as Error).message }
+  }
+}
+
+export async function closeTrialAction(
+  signOffId: string,
+  userId: string,
+  reason: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const actingUserId = await resolveActingUserId(userId)
+    await dbCloseTrialSignOff(signOffId, actingUserId, reason)
+    revalidatePath('/sign-offs')
+    revalidatePath(`/sign-offs/${signOffId}`)
+    return { success: true }
+  } catch (e) {
+    return { success: false, error: (e as Error).message }
+  }
+}
+
+export async function extendTrialAction(
+  signOffId: string,
+  userId: string,
+  newEndDate: string,
+  reason: string,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const actingUserId = await resolveActingUserId(userId)
+    await dbExtendTrial(signOffId, actingUserId, newEndDate, reason)
+    revalidatePath('/sign-offs')
+    revalidatePath(`/sign-offs/${signOffId}`)
+    return { success: true }
   } catch (e) {
     return { success: false, error: (e as Error).message }
   }

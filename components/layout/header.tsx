@@ -48,6 +48,7 @@ const NAV_LINKS = [
   { href: '/sign-offs', label: 'Sign-Offs' },
 ]
 
+const ANALYTICS_LINK = { href: '/analytics', label: 'Analytics' }
 const ADMIN_LINK = { href: '/admin/departments', label: 'Admin' }
 
 function ThemeToggle() {
@@ -139,11 +140,16 @@ export function Header() {
     [allUsers],
   )
 
-  const isAdmin = currentUser.role === 'APPROVER' || currentUser.role === 'COUNCIL_MEMBER'
+  const isAdmin = currentUser.role === 'APPROVER'
+  const isApproverOrCouncil = currentUser.role === 'APPROVER' || currentUser.role === 'COUNCIL_MEMBER'
 
   const navLinks = useMemo(
-    () => [...NAV_LINKS, ...(isAdmin ? [ADMIN_LINK] : [])],
-    [isAdmin],
+    () => [
+      ...NAV_LINKS,
+      ...(isApproverOrCouncil ? [ANALYTICS_LINK] : []),
+      ...(isAdmin ? [ADMIN_LINK] : []),
+    ],
+    [isAdmin, isApproverOrCouncil],
   )
 
   function getRoleBadge(user: User): string | null {

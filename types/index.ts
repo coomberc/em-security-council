@@ -9,9 +9,9 @@ export const SIGN_OFF_STATUSES = [
 export type SignOffStatus = (typeof SIGN_OFF_STATUSES)[number]
 
 export const SIGN_OFF_CATEGORIES = [
-  'NEW_SUPPLIER_SOFTWARE', 'THIRD_PARTY_TOOL', 'SCOPE_CHANGE',
-  'NEW_PRODUCT_PLATFORM', 'SIGNIFICANT_CHANGE', 'TECHNICAL_INTEGRATION',
-  'AI_FUNCTIONALITY', 'DATA_SECURITY_IMPACT', 'OTHER',
+  'NEW_VENDOR_SUPPLIER', 'EXISTING_VENDOR_CHANGE', 'AI_ML_USAGE',
+  'DATA_HANDLING_CHANGE', 'INFRASTRUCTURE_CHANGE', 'NEW_PRODUCT_FEATURE',
+  'INCIDENT_REMEDIATION', 'OTHER',
 ] as const
 export type SignOffCategory = (typeof SIGN_OFF_CATEGORIES)[number]
 
@@ -19,6 +19,9 @@ export const USER_ROLES = ['APPROVER', 'COUNCIL_MEMBER', 'STAFF_MEMBER'] as cons
 export type UserRole = (typeof USER_ROLES)[number]
 
 export type ApprovalDecision = 'APPROVED' | 'REJECTED' | 'HAS_COMMENTS'
+
+export const TRIAL_OUTCOMES = ['PENDING', 'ROLLED_OUT', 'CLOSED'] as const
+export type TrialOutcome = (typeof TRIAL_OUTCOMES)[number]
 
 export const RISK_LIKELIHOODS = ['VERY_LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY_HIGH'] as const
 export type RiskLikelihood = (typeof RISK_LIKELIHOODS)[number]
@@ -136,6 +139,9 @@ export interface RiskAssessment {
   complianceCertifications: string[]
   mitigationPlan?: string
   residualRiskNotes?: string
+  dataPrivacyNA: boolean
+  riskScoringNA: boolean
+  controlsNA: boolean
 }
 
 export interface SignOffRequest {
@@ -156,6 +162,9 @@ export interface SignOffRequest {
   trialSuccessCriteria?: string
   trialGoLiveRolloutPlan?: string
   trialEndDate?: string
+  trialOutcome?: TrialOutcome
+  trialClosureReason?: string
+  trialClosedAt?: string
   parentSignOffId?: string
   contentVersion: number
   submittedBy: User
@@ -169,6 +178,7 @@ export interface SignOffRequest {
   comments: SignOffComment[]
   statusHistory: SignOffStatusChange[]
   riskAssessment?: RiskAssessment
+  childSignOffIds: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -192,6 +202,8 @@ export interface SignOffSummary {
   vendorName?: string
   isTrial: boolean
   trialEndDate?: string
+  trialOutcome?: TrialOutcome
+  parentSignOffId?: string
   submittedBy: Pick<User, 'id' | 'name'>
   department: Department
   createdAt: string
@@ -282,6 +294,9 @@ export interface CreateRiskAssessmentInput {
   complianceCertifications?: string[]
   mitigationPlan?: string
   residualRiskNotes?: string
+  dataPrivacyNA?: boolean
+  riskScoringNA?: boolean
+  controlsNA?: boolean
 }
 
 // ---------------------------------------------------------------------------
