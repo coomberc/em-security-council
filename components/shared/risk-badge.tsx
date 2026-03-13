@@ -1,23 +1,25 @@
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
 import { getRiskLevel } from '@/lib/constants'
 
 const RISK_CONFIG = {
   low: {
     label: 'Low Risk',
-    className: 'border-[#059669] bg-[#10b981] text-white dark:bg-[#34d399]/10 dark:text-[#34d399] dark:border-[#34d399]/40',
+    light: { bg: '#10b981', text: '#ffffff', border: '#059669' },
+    dark: { bg: 'rgba(52,211,153,0.1)', text: '#34d399', border: 'rgba(52,211,153,0.4)' },
   },
   medium: {
     label: 'Medium Risk',
-    className: 'border-[#d97706] bg-[#f59e0b] text-white dark:bg-[#fbbf24]/10 dark:text-[#fbbf24] dark:border-[#fbbf24]/40',
+    light: { bg: '#f59e0b', text: '#ffffff', border: '#d97706' },
+    dark: { bg: 'rgba(251,191,36,0.1)', text: '#fbbf24', border: 'rgba(251,191,36,0.4)' },
   },
   high: {
     label: 'High Risk',
-    className: 'border-[#c2410c] bg-[#f97316] text-white dark:bg-[#fb923c]/10 dark:text-[#fb923c] dark:border-[#fb923c]/40',
+    light: { bg: '#f97316', text: '#ffffff', border: '#c2410c' },
+    dark: { bg: 'rgba(251,146,60,0.1)', text: '#fb923c', border: 'rgba(251,146,60,0.4)' },
   },
   critical: {
     label: 'Critical Risk',
-    className: 'border-[#dc2626] bg-[#ef4444] text-white dark:bg-[#f87171]/10 dark:text-[#f87171] dark:border-[#f87171]/40',
+    light: { bg: '#ef4444', text: '#ffffff', border: '#dc2626' },
+    dark: { bg: 'rgba(248,113,113,0.1)', text: '#f87171', border: 'rgba(248,113,113,0.4)' },
   },
 }
 
@@ -25,8 +27,19 @@ export function RiskBadge({ score }: { score: number }) {
   const level = getRiskLevel(score)
   const config = RISK_CONFIG[level]
   return (
-    <Badge variant="outline" className={cn('font-medium border', config.className)}>
-      {config.label} ({score})
-    </Badge>
+    <>
+      <span
+        className="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap dark:hidden"
+        style={{ backgroundColor: config.light.bg, color: config.light.text, border: `1px solid ${config.light.border}` }}
+      >
+        {config.label} ({score})
+      </span>
+      <span
+        className="hidden dark:inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
+        style={{ backgroundColor: config.dark.bg, color: config.dark.text, border: `1px solid ${config.dark.border}` }}
+      >
+        {config.label} ({score})
+      </span>
+    </>
   )
 }
