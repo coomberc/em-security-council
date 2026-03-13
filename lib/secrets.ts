@@ -21,7 +21,8 @@ async function fetchSecrets(): Promise<Record<string, string>> {
 }
 
 export async function getSecret(key: string): Promise<string | undefined> {
-  if (process.env.NODE_ENV !== 'production') {
+  // In non-production or when env var is already set (e.g. Vercel), use it directly
+  if (process.env.NODE_ENV !== 'production' || process.env[key]) {
     return process.env[key]
   }
 
