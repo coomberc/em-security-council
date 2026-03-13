@@ -1,24 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const SITE_PASSWORD = process.env.SITE_PASSWORD
+const SKIP_PATHS = ['/login', '/api/auth', '/_next', '/icon', '/favicon.ico']
 
 export function middleware(request: NextRequest) {
-  // Skip if no password configured (local dev)
-  if (!SITE_PASSWORD) return NextResponse.next()
+  const sitePassword = process.env.SITE_PASSWORD
 
-  // Skip the login page itself and static assets
-  if (
-    request.nextUrl.pathname === '/login' ||
-    request.nextUrl.pathname.startsWith('/_next') ||
-    request.nextUrl.pathname.startsWith('/icon') ||
-    request.nextUrl.pathname === '/favicon.ico'
-  ) {
+  // Skip if no password configured (local dev)
+  if (!sitePassword) return NextResponse.next()
+
+  // Skip login page, auth API, and static assets
+  if (SKIP_PATHS.some((p) => request.nextUrl.pathname.startsWith(p))) {
     return NextResponse.next()
   }
 
   // Check for auth cookie
   const authCookie = request.cookies.get('site-auth')?.value
-  if (authCookie === SITE_PASSWORD) {
+  if (authCookie === sitePassword) {
     return NextResponse.next()
   }
 
