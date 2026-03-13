@@ -39,9 +39,6 @@ export function RiskBadge({ score }: { score: number }) {
         '--sb-border-dark': dark.border,
         backgroundColor: 'var(--sb-bg)',
         color: 'var(--sb-text)',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        borderColor: 'var(--sb-border)',
       } as React.CSSProperties}
     >
       {label} ({score})

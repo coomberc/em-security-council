@@ -13,9 +13,6 @@ export function TrialBadge() {
         '--sb-border-dark': 'rgba(251,191,36,0.4)',
         backgroundColor: 'var(--sb-bg)',
         color: 'var(--sb-text)',
-        borderWidth: '1px',
-        borderStyle: 'solid',
-        borderColor: 'var(--sb-border)',
       } as React.CSSProperties}
     >
       <FlaskConical className="mr-1 h-3 w-3" />

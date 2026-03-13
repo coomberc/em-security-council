@@ -127,5 +127,4 @@
 .dark .trial-badge {
   background-color: var(--sb-bg-dark) !important;
   color: var(--sb-text-dark) !important;
-  border-color: var(--sb-border-dark) !important;
 }
