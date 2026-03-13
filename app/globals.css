@@ -120,3 +120,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Badge colour overrides for dark mode — bypasses Tailwind oklch */
+.dark .status-badge,
+.dark .risk-badge,
+.dark .trial-badge {
+  background-color: var(--sb-bg-dark) !important;
+  color: var(--sb-text-dark) !important;
+  border-color: var(--sb-border-dark) !important;
+}

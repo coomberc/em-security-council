@@ -25,21 +25,26 @@ const RISK_CONFIG = {
 
 export function RiskBadge({ score }: { score: number }) {
   const level = getRiskLevel(score)
-  const config = RISK_CONFIG[level]
+  const { label, light, dark } = RISK_CONFIG[level]
+
   return (
-    <>
-      <span
-        className="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap dark:hidden"
-        style={{ backgroundColor: config.light.bg, color: config.light.text, border: `1px solid ${config.light.border}` }}
-      >
-        {config.label} ({score})
-      </span>
-      <span
-        className="hidden dark:inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
-        style={{ backgroundColor: config.dark.bg, color: config.dark.text, border: `1px solid ${config.dark.border}` }}
-      >
-        {config.label} ({score})
-      </span>
-    </>
+    <span
+      className="inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap risk-badge"
+      style={{
+        '--sb-bg': light.bg,
+        '--sb-text': light.text,
+        '--sb-border': light.border,
+        '--sb-bg-dark': dark.bg,
+        '--sb-text-dark': dark.text,
+        '--sb-border-dark': dark.border,
+        backgroundColor: 'var(--sb-bg)',
+        color: 'var(--sb-text)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'var(--sb-border)',
+      } as React.CSSProperties}
+    >
+      {label} ({score})
+    </span>
   )
 }

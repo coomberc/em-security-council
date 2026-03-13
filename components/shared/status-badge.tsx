@@ -34,21 +34,26 @@ const STATUS_CONFIG: Record<SignOffStatus, { label: string; light: { bg: string;
 }
 
 export function StatusBadge({ status }: { status: SignOffStatus }) {
-  const config = STATUS_CONFIG[status]
+  const { label, light, dark } = STATUS_CONFIG[status]
+
   return (
-    <>
-      <span
-        className="inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap dark:hidden"
-        style={{ backgroundColor: config.light.bg, color: config.light.text, border: `1px solid ${config.light.border}` }}
-      >
-        {config.label}
-      </span>
-      <span
-        className="hidden dark:inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
-        style={{ backgroundColor: config.dark.bg, color: config.dark.text, border: `1px solid ${config.dark.border}` }}
-      >
-        {config.label}
-      </span>
-    </>
+    <span
+      className="inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap status-badge"
+      style={{
+        '--sb-bg': light.bg,
+        '--sb-text': light.text,
+        '--sb-border': light.border,
+        '--sb-bg-dark': dark.bg,
+        '--sb-text-dark': dark.text,
+        '--sb-border-dark': dark.border,
+        backgroundColor: 'var(--sb-bg)',
+        color: 'var(--sb-text)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: 'var(--sb-border)',
+      } as React.CSSProperties}
+    >
+      {label}
+    </span>
   )
 }
