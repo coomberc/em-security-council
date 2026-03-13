@@ -270,7 +270,7 @@ export function FormTabReview({
                     href={doc.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#6C33DA] dark:text-[#c4b5fd] hover:underline"
+                    className="text-[#2563eb] dark:text-[#60a5fa] hover:underline"
                   >
                     {doc.title}
                   </a>

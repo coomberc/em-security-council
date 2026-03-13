@@ -99,7 +99,7 @@ export function ApprovalTracker({ approvers, approvals, allUsers }: ApprovalTrac
                 {isAutoApproved && (
                   <Badge
                     variant="outline"
-                    className="ml-1 gap-0.5 border-[#c4b5fd] bg-[#ede9fe] text-[#5b21b6] text-[10px] px-1.5 py-0 dark:border-[#4c1d95] dark:bg-[#2e1065] dark:text-[#c4b5fd]"
+                    className="ml-1 gap-0.5 border-[#d1d5db] bg-[#f3f4f6] text-[#374151] text-[10px] px-1.5 py-0 dark:border-[#4b5563] dark:bg-[#374151] dark:text-[#d1d5db]"
                   >
                     <Zap className="h-2.5 w-2.5" />
                     Auto

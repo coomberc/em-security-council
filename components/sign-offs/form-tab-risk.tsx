@@ -674,7 +674,7 @@ function RequirementBanner({
   }
 
   return (
-    <div className="rounded-md border border-[#c4b5fd] bg-[#ede9fe] px-3 py-2 text-sm text-[#5b21b6] dark:border-[#4c1d95] dark:bg-[#2e1065] dark:text-[#c4b5fd]">
+    <div className="rounded-md border border-[#d1d5db] bg-[#f9fafb] px-3 py-2 text-sm text-foreground dark:border-[#4b5563] dark:bg-[#1f2937]">
       <div className="flex items-center gap-2">
         <Info className="h-4 w-4 shrink-0" />
         <span className="font-medium">Risk assessment is optional</span>

@@ -5,9 +5,9 @@ export function TrialBadge() {
     <span
       className="inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap trial-badge"
       style={{
-        '--sb-bg': '#f59e0b',
-        '--sb-text': '#ffffff',
-        '--sb-border': '#d97706',
+        '--sb-bg': '#fde68a',
+        '--sb-text': '#78350f',
+        '--sb-border': '#f59e0b',
         '--sb-bg-dark': 'rgba(251,191,36,0.1)',
         '--sb-text-dark': '#fbbf24',
         '--sb-border-dark': 'rgba(251,191,36,0.4)',

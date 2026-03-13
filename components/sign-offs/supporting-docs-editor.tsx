@@ -61,7 +61,7 @@ export function SupportingDocsEditor({ docs, onChange }: SupportingDocsEditorPro
                   href={doc.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm font-medium text-[#6C33DA] dark:text-[#c4b5fd] hover:underline truncate block"
+                  className="text-sm font-medium text-[#2563eb] dark:text-[#60a5fa] hover:underline truncate block"
                 >
                   {doc.title}
                 </a>

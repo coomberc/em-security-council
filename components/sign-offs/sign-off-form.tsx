@@ -410,9 +410,9 @@ export function SignOffForm({ existingSignOff }: SignOffFormProps) {
     <div className="space-y-4">
       {/* Draft recovery banner */}
       {hasDraft && recoveredDraft && (
-        <div className="rounded-md border border-[#c4b5fd] bg-[#ede9fe] p-4 dark:border-[#4c1d95] dark:bg-[#2e1065]">
+        <div className="rounded-md border border-[#d1d5db] bg-[#f9fafb] p-4 dark:border-[#4b5563] dark:bg-[#1f2937]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[#5b21b6] dark:text-[#c4b5fd]">
+            <div className="flex items-center gap-2 text-foreground">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span className="text-sm font-medium">
                 An unsaved draft was found in your browser. Would you like to restore it?

@@ -267,7 +267,7 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
                   href={signOff.vendorWebsite}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#6C33DA] dark:text-[#c4b5fd] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#2563eb] dark:text-[#60a5fa] hover:underline"
                 >
                   <Globe className="h-3 w-3" />
                   Website
@@ -300,9 +300,9 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
 
       {/* Linked parent/child sign-off */}
       {signOff.parentSignOffId && (
-        <Card className="border-[#c4b5fd] bg-[#ede9fe]/50 dark:border-[#4c1d95] dark:bg-[#2e1065]/50">
+        <Card className="border-[#d1d5db] bg-[#f9fafb] dark:border-[#4b5563] dark:bg-[#1f2937]/50">
           <CardContent className="flex items-center gap-2 py-3">
-            <FileText className="h-4 w-4 text-[#6C33DA] dark:text-[#c4b5fd]" />
+            <FileText className="h-4 w-4 text-[#2563eb] dark:text-[#60a5fa]" />
             <span className="text-sm">
               This is a rollout request linked to trial sign-off{' '}
               <Link
@@ -441,7 +441,7 @@ export function SignOffDetail({ signOff }: SignOffDetailProps) {
                         href={doc.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#6C33DA] dark:text-[#c4b5fd] hover:underline truncate"
+                        className="text-[#2563eb] dark:text-[#60a5fa] hover:underline truncate"
                       >
                         {doc.title}
                       </a>

@@ -3,32 +3,32 @@ import type { SignOffStatus } from '@/types'
 const STATUS_CONFIG: Record<SignOffStatus, { label: string; light: { bg: string; text: string; border: string }; dark: { bg: string; text: string; border: string } }> = {
   DRAFT: {
     label: 'Draft',
-    light: { bg: '#6b7280', text: '#ffffff', border: '#6b7280' },
+    light: { bg: '#e5e7eb', text: '#374151', border: '#9ca3af' },
     dark: { bg: 'rgba(107,114,128,0.15)', text: '#d1d5db', border: 'rgba(107,114,128,0.4)' },
   },
   SUBMITTED: {
     label: 'Submitted',
-    light: { bg: '#f59e0b', text: '#ffffff', border: '#d97706' },
+    light: { bg: '#fde68a', text: '#78350f', border: '#f59e0b' },
     dark: { bg: 'rgba(251,191,36,0.1)', text: '#fbbf24', border: 'rgba(251,191,36,0.4)' },
   },
   HAS_COMMENTS: {
     label: 'Has Comments',
-    light: { bg: '#f97316', text: '#ffffff', border: '#c2410c' },
+    light: { bg: '#fed7aa', text: '#7c2d12', border: '#f97316' },
     dark: { bg: 'rgba(251,146,60,0.1)', text: '#fb923c', border: 'rgba(251,146,60,0.4)' },
   },
   APPROVED: {
     label: 'Approved',
-    light: { bg: '#10b981', text: '#ffffff', border: '#059669' },
+    light: { bg: '#a7f3d0', text: '#065f46', border: '#10b981' },
     dark: { bg: 'rgba(52,211,153,0.1)', text: '#34d399', border: 'rgba(52,211,153,0.4)' },
   },
   REJECTED: {
     label: 'Rejected',
-    light: { bg: '#ef4444', text: '#ffffff', border: '#dc2626' },
+    light: { bg: '#fecaca', text: '#991b1b', border: '#ef4444' },
     dark: { bg: 'rgba(248,113,113,0.1)', text: '#f87171', border: 'rgba(248,113,113,0.4)' },
   },
   WITHDRAWN: {
     label: 'Withdrawn',
-    light: { bg: '#9ca3af', text: '#ffffff', border: '#9ca3af' },
+    light: { bg: '#e5e7eb', text: '#6b7280', border: '#9ca3af' },
     dark: { bg: 'rgba(107,114,128,0.1)', text: '#9ca3af', border: 'rgba(107,114,128,0.4)' },
   },
 }

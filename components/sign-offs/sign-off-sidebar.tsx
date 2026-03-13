@@ -72,10 +72,10 @@ export function SignOffSidebar({ signOff }: SignOffSidebarProps) {
 
       {/* Unknown Risk Fields Warning (for approvers) */}
       {isApprover && unknownFields.length > 0 && (
-        <Card className="border-[#FFB900] dark:border-[#b45309]">
+        <Card className="border-[#d97706] dark:border-[#fbbf24]/40">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base text-[#92400e] dark:text-[#fcd34d]">
-              <AlertTriangle className="h-4 w-4" />
+            <CardTitle className="flex items-center gap-2 text-base text-foreground">
+              <AlertTriangle className="h-4 w-4 text-[#d97706] dark:text-[#fbbf24]" />
               Unknown Risk Fields
             </CardTitle>
           </CardHeader>
@@ -88,9 +88,9 @@ export function SignOffSidebar({ signOff }: SignOffSidebarProps) {
               {unknownFields.map((field) => (
                 <li
                   key={field}
-                  className="flex items-center gap-2 text-sm text-[#92400e] dark:text-[#fcd34d]"
+                  className="flex items-center gap-2 text-sm text-foreground"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#FFB900] shrink-0" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#d97706] dark:bg-[#fbbf24] shrink-0" />
                   {field}
                 </li>
               ))}
